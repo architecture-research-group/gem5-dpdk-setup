@@ -1,0 +1,9 @@
+resources/boot.arm64 filter=lfs diff=lfs merge=lfs -text
+resources/rootfs.ext2 filter=lfs diff=lfs merge=lfs -text
+resources/vmlinux filter=lfs diff=lfs merge=lfs -text
+resources-dpdk/boot.arm64 filter=lfs diff=lfs merge=lfs -text
+resources-dpdk/rootfs.ext2 filter=lfs diff=lfs merge=lfs -text
+resources-dpdk/vmlinux filter=lfs diff=lfs merge=lfs -text
+resources-new/boot.arm64 filter=lfs diff=lfs merge=lfs -text
+resources-new/rootfs.ext2 filter=lfs diff=lfs merge=lfs -text
+resources-new/vmlinux filter=lfs diff=lfs merge=lfs -text

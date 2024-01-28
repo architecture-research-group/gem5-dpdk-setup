@@ -1,0 +1,28 @@
+Global frequency set at 1000000000000 ticks per second
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 21.1.0.2
+gem5 compiled Jan 17 2024 23:56:54
+gem5 started Jan 19 2024 15:13:20
+gem5 executing on 26390ff9320c, pid 71680
+command line: ./build/ARM/gem5.opt configs/example/fs.py --l3cache --disk=../resources/rootfs.ext2 --kernel=../resources/vmlinux --bootloader=../resources/boot.arm64 --root=/dev/sda --l2cache -n 4 --cpu-type DerivO3CPU --caches --smt-model --cpu-clock 3GHz
+
+run: 0
+run: 2
+m5out/system.dtb
+/
+freq!!
+3000000000
+cpus
+freq!!
+3000000000
+cpus
+freq!!
+3000000000
+cpus
+freq!!
+3000000000
+cpus
+**** REAL SIMULATION ****
+Exiting @ tick 11608755003288 because user interrupt received

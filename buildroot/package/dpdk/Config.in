@@ -1,0 +1,4 @@
+config BR2_PACKAGE_DPDK
+	bool "dpdk"
+	help
+		dpdk for gem5

@@ -1,0 +1,22 @@
+version: '3'
+services:
+    alpine:
+        build:
+            context: .
+            dockerfile: devtools/Dockerfile.alpine
+    ubuntu:
+        build:
+            context: .
+            dockerfile: devtools/Dockerfile.ubuntu
+    debian:
+        build:
+            context: .
+            dockerfile: devtools/Dockerfile.debian
+    arch:
+        build:
+            context: .
+            dockerfile: devtools/Dockerfile.arch
+    fedora:
+        build:
+            context: .
+            dockerfile: devtools/Dockerfile.fedora
