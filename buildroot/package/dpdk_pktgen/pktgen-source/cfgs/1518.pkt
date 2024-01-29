@@ -1,0 +1,4 @@
+set 0 dst mac 00:90:00:00:00:02
+set 0 size 1518
+set 0 rate 56
+start 0

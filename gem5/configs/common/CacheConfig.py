@@ -45,109 +45,6 @@ from m5.objects import *
 from common.Caches import *
 from common import ObjectList
 
-class L1CacheSmt(Cache):
-    """ This is a Simple L1Cache That Models a Cache with 4 ports:
-        2 iCache ports and 2 dCache ports """
-    assoc = 2
-    tag_latency = 2
-    data_latency = 2
-    response_latency = 2
-    mshrs = 4
-    tgts_per_mshr = 20
-    
-    # def __init__(self):
-    #     super(L1CacheSmt, self).__init__()
-    #     pass
-
-    def connectBus(self, bus):
-        """Connect this cache to a memory-side bus"""
-        self.mem_side = bus.cpu_side_ports # or self.mem_side = bus.slave
-
-    def connectCPU(self, cpu):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        raise NotImplementedError
-    
-class L1ICacheSmt(L1CacheSmt):
-    """Simple L1I Cache with default values"""
-    # def __init__(self):
-    #     super(L1ICacheSmt,self).__init__()
-    #     pass
-     
-    def connectCPU(self, cpu):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.cpu_side = cpu.icache_port
-
-class L1DCacheSmt(L1CacheSmt):
-    """Simple L1D Cache with default values"""
-     
-    # def __init__(self):
-    #     super(L1DCacheSmt,self).__init__()
-    #     pass
-
-    def connectCPU(self, cpu):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.cpu_side = cpu.dcache_port
-
-class L2CacheSmt(Cache):
-    """Simple L2 Cache with default values"""
-    assoc = 8
-    tag_latency = 20
-    data_latency = 20
-    response_latency = 20
-    mshrs = 20
-    tgts_per_mshr = 12
-    write_buffers = 8
-    # def __init__(self):
-    #     super(L2CacheSmt,self).__init__()
-    #     pass
-
-    def connectCPUSideBus(self, bus):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        raise NotImplementedError
-
-    def connectMemSideBus(self, bus):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.mem_side = bus.cpu_side_ports # or self.mem_side = bus.slave
-
-class L2CacheSmtCpu(L2CacheSmt):
-    """Simple L2 Cache with default values"""
-    # def __init__(self):
-    #     super(L2CacheSmtCpu,self).__init__()
-    #     pass
-
-    def connectCPUSideBus(self, bus):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.cpu_side = bus.mem_side_ports # or self.cpu_side = bus.master
-
-class L3CacheSmt(Cache):
-    """Simple L3 Cache with default values"""
-    assoc = 8
-    tag_latency = 20
-    data_latency = 20
-    response_latency = 20
-    mshrs = 20
-    tgts_per_mshr = 12
-    write_buffers = 8
-    # def __init__(self):
-    #     super(L3CacheSmt,self).__init__()
-    #     pass
-
-    def connectCPUSideBus(self, bus):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.cpu_side = bus.mem_side_ports # or self.cpu_side = bus.master
-
-    def connectMemSideBus(self, bus):
-        """Connect this cache's port to a CPU-side port
-           This must be defined in a subclass"""
-        self.mem_side = bus.cpu_side_ports # or self.cpu_side = bus.slave
-
 def _get_hwp(hwp_option):
     if hwp_option == None:
         return NULL
@@ -176,18 +73,6 @@ def config_cache(options, system):
     if options.external_memory_system and (options.caches or options.l2cache):
         print("External caches and internal caches are exclusive options.\n")
         sys.exit(1)
-    
-    if (options.smt_model or options.smt) and options.num_cpus%2 != 0:
-        print("You can only use the SMT models with even number of cores.\n")
-        sys.exit(1)
-
-    if options.smt_model and options.num_cpus > 8:
-        print("You can only use this smt model with at most 4 cores.\n")
-        sys.exit(1)
-    
-    if (options.smt_model or options.smt) and not options.l3cache:
-        print("You can only use SMT models with l3caches.\n")
-        sys.exit(1)
 
     if options.external_memory_system:
         ExternalCache = ExternalCacheFactory(options.external_memory_system)
@@ -212,12 +97,6 @@ def config_cache(options, system):
 
         dcache_class, icache_class, l2_cache_class, walk_cache_class = \
             core.HPI_DCache, core.HPI_ICache, core.HPI_L2, core.HPI_WalkCache
-    elif options.smt:
-        dcache_class, icache_class, dcache_class_smt, icache_class_smt, l2_cache_class, walk_cache_class = \
-            L1_DCache, L1_ICache, L1_DCache, L1_ICache, L2Cache, None
-    elif options.smt_model:
-        dcache_class_smt1, icache_class_smt1, dcache_class_smt2, icache_class_smt2, l2_cache_class_smt1, l2_cache_class_smt2, l3_cache_class, walk_cache_class = \
-            L1DCacheSmt, L1ICacheSmt, L1DCacheSmt, L1ICacheSmt, L2CacheSmtCpu, L2CacheSmtCpu, L3CacheSmt, None
     else:
         dcache_class, icache_class, l2_cache_class, walk_cache_class = \
             L1_DCache, L1_ICache, L2Cache, None
@@ -239,14 +118,9 @@ def config_cache(options, system):
     # Add L3 cache (for IDIO)
     if options.l3cache:
         if not options.l2cache:
-            fatal("L3 cache cannot exist without L2 cache")
+            fetal("L3 cache cannot exist without L2 cache")
 
-        if options.smt_model:
-            system.l3 = l3_cache_class(clk_domain = system.cpu_clk_domain,
-                                        size = options.l3_size,
-                                        assoc = options.l3_assoc)
-        else:
-            system.l3 = l2_cache_class(clk_domain = system.cpu_clk_domain,
+        system.l3 = l2_cache_class(clk_domain = system.cpu_clk_domain,
                                     size = options.l3_size,
                                     assoc = options.l3_assoc)
         if options.disable_snoop_filter:
@@ -254,53 +128,28 @@ def config_cache(options, system):
         else:
             system.tol3bus = L3XBar(clk_domain = system.clk_domain,
             snoop_filter=SnoopFilter(lookup_latency = 0, is_for_l3x = True, max_capacity="32MB"))
-        if options.smt_model:
-            system.l3.connectCPUSideBus(system.tol3bus) 
-            system.l3.connectMemSideBus(system.membus)
-        else:
-            system.l3.cpu_side = system.tol3bus.master
-            system.l3.mem_side = system.membus.slave
+
+        system.l3.cpu_side = system.tol3bus.master
+        system.l3.mem_side = system.membus.slave
 
     elif options.l2cache:
         # Provide a clock for the L2 and the L1-to-L2 bus here as they
         # are not connected using addTwoLevelCacheHierarchy. Use the
         # same clock as the CPUs.
-        if options.smt_model:
-
-            # system.l2 = l3_cache_class(clk_domain=system.cpu_clk_domain,
-            #                        **_get_cache_opts('l2', options))
-            
-            # system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
-            # system.l2.connectCPUSideBus(system.tol2bus)
-            # system.l2.connectMemSideBus(system.membus)
-        else:
-            system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
+        system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
                                    **_get_cache_opts('l2', options))
 
-            system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
-            system.l2.cpu_side = system.tol2bus.master
-            system.l2.mem_side = system.membus.slave
+        system.tol2bus = L2XBar(clk_domain = system.cpu_clk_domain)
+        system.l2.cpu_side = system.tol2bus.master
+        system.l2.mem_side = system.membus.slave
 
     if options.memchecker:
         system.memchecker = MemChecker()
-    
-    for i in range(0,options.num_cpus,2):
-        print(f"run: {i}")
+
+    for i in range(options.num_cpus):
         if options.caches:
-            # JOHNSON
-            if options.smt_model:
-                icache_smt_1 = icache_class_smt1(**_get_cache_opts('l1i', options))
-                dcache_smt_1 = dcache_class_smt1(**_get_cache_opts('l1d', options))
-                icache_smt_2 = icache_class_smt2(**_get_cache_opts('l1i', options))
-                dcache_smt_2 = dcache_class_smt2(**_get_cache_opts('l1d', options))
-            elif options.smt:
-                icache_smt1 = icache_class(**_get_cache_opts('l1i', options))
-                dcache_smt1 = dcache_class(**_get_cache_opts('l1d', options))
-                icache_smt2 = icache_class_smt(**_get_cache_opts('l1i', options))
-                dcache_smt2 = dcache_class_smt(**_get_cache_opts('l1d', options))
-            else:
-                icache = icache_class(**_get_cache_opts('l1i', options))
-                dcache = dcache_class(**_get_cache_opts('l1d', options))
+            icache = icache_class(**_get_cache_opts('l1i', options))
+            dcache = dcache_class(**_get_cache_opts('l1d', options))
 
             # SHIN make L2 as MLC of IDIO
             if options.mlc_adaptive_ddio:
@@ -309,11 +158,7 @@ def config_cache(options, system):
                                         prefetchers=[StridePrefetcher(degree=8, latency = 1),
                                                     MlcPrefetcher()]))
             else:
-                if options.smt_model:
-                    l2_smt1 = l2_cache_class_smt1(size=options.l2_size, assoc=options.l2_assoc)
-                    l2_smt2 = l2_cache_class_smt2(size=options.l2_size, assoc=options.l2_assoc)
-                else:
-                    l2 = l2_cache_class(size=options.l2_size, assoc=options.l2_assoc)
+                l2 = l2_cache_class(size=options.l2_size, assoc=options.l2_assoc)
 
             # If we have a walker cache specified, instantiate two
             # instances here
@@ -347,143 +192,16 @@ def config_cache(options, system):
             #                                      iwalkcache, dwalkcache)
 
             if options.l3cache:
-                if options.smt: # JOHNSON
-                    system.cpu[i].addTwoLevelCacheHierarchyMerged(icache_smt1, dcache_smt1, icache_smt2, dcache_smt2, system.cpu[i+1],l2)
-                elif options.smt_model: # JOHNSON
-                    # Connect up icaches, dcaches and l2cache for a 2-cpu cluster sharing the L1 Caches and L2 Cache (Three-Level)
-                    # Specify L2 XBar
-                    if i == 0:
-                        system.tol2bus0 = L2XBar(clk_domain = system.cpu_clk_domain)
-                    elif i == 2:
-                        system.tol2bus1 = L2XBar(clk_domain = system.cpu_clk_domain)
-                    elif i == 4:
-                        system.tol2bus2 = L2XBar(clk_domain = system.cpu_clk_domain)
-                    else:
-                        system.tol2bus3 = L2XBar(clk_domain = system.cpu_clk_domain)
-                    # shared icache
-                    system.cpu[i].icache = icache_smt_1
-                    system.cpu[i+1].icache = icache_smt_2
-                    system.cpu[i].icache.connectCPU(system.cpu[i])
-                    system.cpu[i+1].icache.connectCPU(system.cpu[i+1])
-                    system.cpu[i]._cached_ports = ['icache.mem_side', 'dcache.mem_side']
-                    system.cpu[i+1]._cached_ports = ['icache.mem_side', 'dcache.mem_side']
-                    system.cpu[i]._cached_ports += ArchMMU.walkerPorts()
-                    system.cpu[i+1]._cached_ports += ArchMMU.walkerPorts()
-
-                    # hook up icaches to the L2 XBar
-                    if i == 0:
-                        system.cpu[i].icache.connectBus(system.tol2bus0)
-                        system.cpu[i+1].icache.connectBus(system.tol2bus0)
-                    elif i == 2:
-                        system.cpu[i].icache.connectBus(system.tol2bus1)
-                        system.cpu[i+1].icache.connectBus(system.tol2bus1)
-                    elif i == 4:
-                        system.cpu[i].icache.connectBus(system.tol2bus2)
-                        system.cpu[i+1].icache.connectBus(system.tol2bus2)
-                    else:
-                        system.cpu[i].icache.connectBus(system.tol2bus3)
-                        system.cpu[i+1].icache.connectBus(system.tol2bus3)
-                    # shared dcache
-                    system.cpu[i].dcache = dcache_smt_1
-                    system.cpu[i+1].dcache = dcache_smt_2
-                    system.cpu[i].dcache.connectCPU(system.cpu[i])
-                    system.cpu[i+1].dcache.connectCPU(system.cpu[i+1])
-                    # hook up dcaches to the L2 XBar
-                    if i == 0:
-                        system.cpu[i].dcache.connectBus(system.tol2bus0)
-                        system.cpu[i+1].dcache.connectBus(system.tol2bus0)
-                    elif i == 2:
-                        system.cpu[i].dcache.connectBus(system.tol2bus1)
-                        system.cpu[i+1].dcache.connectBus(system.tol2bus1)
-                    elif i == 4:
-                        system.cpu[i].dcache.connectBus(system.tol2bus2)
-                        system.cpu[i+1].dcache.connectBus(system.tol2bus2)
-                    else:
-                        system.cpu[i].dcache.connectBus(system.tol2bus3)
-                        system.cpu[i+1].dcache.connectBus(system.tol2bus3)
-                    # hook up walkerports to the L2 XBar
-                    if i == 0:
-                        system.cpu[i].mmu.itb_walker.port = system.tol2bus0.cpu_side_ports
-                        system.cpu[i].mmu.dtb_walker.port = system.tol2bus0.cpu_side_ports
-                        system.cpu[i+1].mmu.itb_walker.port = system.tol2bus0.cpu_side_ports
-                        system.cpu[i+1].mmu.dtb_walker.port = system.tol2bus0.cpu_side_ports
-                    elif i == 2:
-                        system.cpu[i].mmu.itb_walker.port = system.tol2bus1.cpu_side_ports
-                        system.cpu[i].mmu.dtb_walker.port = system.tol2bus1.cpu_side_ports
-                        system.cpu[i+1].mmu.itb_walker.port = system.tol2bus1.cpu_side_ports
-                        system.cpu[i+1].mmu.dtb_walker.port = system.tol2bus1.cpu_side_ports
-                    elif i == 4:
-                        system.cpu[i].mmu.itb_walker.port = system.tol2bus2.cpu_side_ports
-                        system.cpu[i].mmu.dtb_walker.port = system.tol2bus2.cpu_side_ports
-                        system.cpu[i+1].mmu.itb_walker.port = system.tol2bus2.cpu_side_ports
-                        system.cpu[i+1].mmu.dtb_walker.port = system.tol2bus2.cpu_side_ports
-                    else:
-                        system.cpu[i].mmu.itb_walker.port = system.tol2bus3.cpu_side_ports
-                        system.cpu[i].mmu.dtb_walker.port = system.tol2bus3.cpu_side_ports
-                        system.cpu[i+1].mmu.itb_walker.port = system.tol2bus3.cpu_side_ports
-                        system.cpu[i+1].mmu.dtb_walker.port = system.tol2bus3.cpu_side_ports
-                    # shared L2 Cache
-                    if i == 0:
-                        system.l2cache0 = l2_smt1
-                    elif i == 2:
-                        system.l2cache1 = l2_smt2
-                    elif i == 4:
-                        system.l2cache2 = l2_smt1
-                    else:
-                        system.l2cache3 = l2_smt2
-                    # hook up l2cache to the L2 XBar
-                    if i == 0:
-                        system.l2cache0.connectCPUSideBus(system.tol2bus0)
-                    elif i == 2:
-                        system.l2cache1.connectCPUSideBus(system.tol2bus1)
-                    elif i == 4:
-                        system.l2cache2.connectCPUSideBus(system.tol2bus2)
-                    else:
-                        system.l2cache3.connectCPUSideBus(system.tol2bus3)
-                    # hook up l2cache to the L3 XBar
-                    if i == 0:
-                        system.l2cache0.connectMemSideBus(system.tol3bus)
-                    elif i == 2:
-                        system.l2cache1.connectMemSideBus(system.tol3bus)
-                    elif i == 4:
-                        system.l2cache2.connectMemSideBus(system.tol3bus)
-                    else:
-                        system.l2cache3.connectMemSideBus(system.tol3bus)
-                else:
-                    system.cpu[i].addTwoLevelCacheHierarchy(icache, dcache, l2)
-                    system.cpu[i+1].addTwoLevelCacheHierarchy(icache, dcache, l2)
+                system.cpu[i].addTwoLevelCacheHierarchy(icache, dcache, l2)
             else:
-                if options.smt_model:
-                    # Connect up icaches, dcaches for a 2-CPU cluster sharing the L1 Caches (Two-Level)
-                    # If here, L2 XBar is already specified
-                    # shared icache
-                    system.cpu[i].icache = icache_smt_1
-                    system.cpu[i+1].icache = icache_smt_2
-                    system.cpu[i].icache.connectCPU(system.cpu[i])
-                    system.cpu[i+1].icache.connectCPU(system.cpu[i+1])
-                    # hook up icaches to the L2 XBar
-                    system.cpu[i].icache.connectBus(system.cpu[i].tol2bus)
-                    system.cpu[i+1].icache.connectBus(system.tol2bus)
-                    # shared dcaches
-                    system.cpu[i].dcache = dcache_smt_1
-                    system.cpu[i+1].dcache = dcache_smt_2
-                    system.cpu[i].dcache.connectCPU(system.cpu[i])
-                    system.cpu[i+1].dcache.connectCPU(system.cpu[i+1])
-                    # hook up dcaches to the L2 XBar
-                    system.cpu[i].dcache.connectBus(system.cpu[i].tol2bus)
-                    system.cpu[i+1].dcache.connectBus(system.cpu[i].tol2bus)
-                else:
-                    system.cpu[i].addPrivateSplitL1Caches(icache, dcache,iwalkcache, dwalkcache)
-                    system.cpu[i+1].addPrivateSplitL1Caches(icache, dcache,iwalkcache, dwalkcache)
+                system.cpu[i].addPrivateSplitL1Caches(icache, dcache,iwalkcache, dwalkcache)
 
             if options.memchecker:
                 # The mem_side ports of the caches haven't been connected yet.
                 # Make sure connectAllPorts connects the right objects.
                 system.cpu[i].dcache = dcache_real
                 system.cpu[i].dcache_mon = dcache_mon
-                system.cpu[i+1].dcache = dcache_real
-                system.cpu[i+1].dcache_mon = dcache_mon
-        
+
         elif options.external_memory_system:
             # These port names are presented to whatever 'external' system
             # gem5 is connecting to.  Its configuration will likely depend
@@ -496,37 +214,21 @@ def config_cache(options, system):
                         ExternalCache("cpu%d.dcache" % i),
                         ExternalCache("cpu%d.itb_walker_cache" % i),
                         ExternalCache("cpu%d.dtb_walker_cache" % i))
-                system.cpu[i+1].addPrivateSplitL1Caches(
-                        ExternalCache("cpu%d.icache" % i),
-                        ExternalCache("cpu%d.dcache" % i),
-                        ExternalCache("cpu%d.itb_walker_cache" % i),
-                        ExternalCache("cpu%d.dtb_walker_cache" % i))
             else:
                 system.cpu[i].addPrivateSplitL1Caches(
                         ExternalCache("cpu%d.icache" % i),
                         ExternalCache("cpu%d.dcache" % i))
-                system.cpu[i+1].addPrivateSplitL1Caches(
-                        ExternalCache("cpu%d.icache" % i),
-                        ExternalCache("cpu%d.dcache" % i))
-            
+
         system.cpu[i].createInterruptController()
-        system.cpu[i+1].createInterruptController()
         if options.l3cache:
-            if options.smt_model:
-                continue
-            else:
-                system.cpu[i].connectAllPorts(system.tol3bus, system.membus)
-            # system.cpu[i+1].connectAllPorts(system.tol3bus, system.membus)
+            system.cpu[i].connectAllPorts(system.tol3bus, system.membus)
         elif options.l2cache:
             system.cpu[i].connectAllPorts(system.tol2bus, system.membus)
-            # system.cpu[i+1].connectAllPorts(system.tol2bus, system.membus)
         elif options.external_memory_system:
             system.cpu[i].connectUncachedPorts(system.membus)
-            # system.cpu[i+1].connectUncachedPorts(system.membus)
         else:
             system.cpu[i].connectAllPorts(system.membus)
-            # system.cpu[i+1].connectAllPorts(system.membus)
-        
+
     return system
 
 # ExternalSlave provides a "port", but when that port connects to a cache,

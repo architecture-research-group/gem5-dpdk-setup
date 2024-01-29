@@ -5,15 +5,19 @@
 #ifndef _RTE_MCSLOCK_ARM_H_
 #define _RTE_MCSLOCK_ARM_H_
 
-#ifndef RTE_FORCE_INTRINSICS
-#  error Platform must be built with RTE_FORCE_INTRINSICS
-#endif
+//#ifndef RTE_FORCE_INTRINSICS
+//#  error Platform must be built with RTE_FORCE_INTRINSICS
+//#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "generic/rte_mcslock.h"
+
+#ifndef RTE_FORCE_INTRINSICS
+#  error Platform must be built with RTE_FORCE_INTRINSICS
+#endif
 
 #ifdef __cplusplus
 }

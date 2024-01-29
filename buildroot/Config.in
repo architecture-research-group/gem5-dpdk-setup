@@ -1,2 +1,4 @@
 source "$BR2_EXTERNAL_DPDK_GEM5_PATH/package/dpdk/Config.in"
 source "$BR2_EXTERNAL_DPDK_GEM5_PATH/package/dpdk_memcached/Config.in"
+source "$BR2_EXTERNAL_DPDK_GEM5_PATH/package/dpdk_pktgen/Config.in"
+source "$BR2_EXTERNAL_DPDK_GEM5_PATH/package/cloudsuite_memcached/Config.in"

@@ -5,9 +5,9 @@
 #ifndef _RTE_SPINLOCK_ARM_H_
 #define _RTE_SPINLOCK_ARM_H_
 
-#ifndef RTE_FORCE_INTRINSICS
-#  error Platform must be built with RTE_FORCE_INTRINSICS
-#endif
+//#ifndef RTE_FORCE_INTRINSICS
+//#  error Platform must be built with RTE_FORCE_INTRINSICS
+//#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +15,10 @@ extern "C" {
 
 #include <rte_common.h>
 #include "generic/rte_spinlock.h"
+
+#ifndef RTE_FORCE_INTRINSICS
+#  error Platform must be built with RTE_FORCE_INTRINSICS
+#endif
 
 static inline int rte_tm_supported(void)
 {

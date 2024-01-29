@@ -1099,15 +1099,15 @@ eth_em_recv_scattered_pkts(void *rx_queue, struct rte_mbuf **rx_pkts,
 	rxq->nb_rx_hold = nb_hold;
 
 	
-	struct rte_ether_hdr *eth_hdr;
-	struct rte_mbuf *mb;
-	int i;
-	for (i = 0; i < nb_rx; i++) {
-		mb = rx_pkts[i];
-		eth_hdr = rte_pktmbuf_mtod(mb, struct rte_ether_hdr *);
-		printf("dest %s \n", eth_hdr->d_addr.addr_bytes);
-		printf("source %s \n", eth_hdr->s_addr.addr_bytes);
-	}
+	//struct rte_ether_hdr *eth_hdr;
+	//struct rte_mbuf *mb;
+	//int i;
+	//for (i = 0; i < nb_rx; i++) {
+	//	mb = rx_pkts[i];
+	//	eth_hdr = rte_pktmbuf_mtod(mb, struct rte_ether_hdr *);
+	//	printf("dest %s \n", eth_hdr->d_addr.addr_bytes);
+	//	printf("source %s \n", eth_hdr->s_addr.addr_bytes);
+	//}
 
 	return nb_rx;
 

@@ -6,9 +6,9 @@
 #ifndef _RTE_ATOMIC_ARM64_H_
 #define _RTE_ATOMIC_ARM64_H_
 
-#ifndef RTE_FORCE_INTRINSICS
-#  error Platform must be built with RTE_FORCE_INTRINSICS
-#endif
+//#ifndef RTE_FORCE_INTRINSICS
+//#  error Platform must be built with RTE_FORCE_INTRINSICS
+//#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,6 +18,10 @@ extern "C" {
 #include <rte_branch_prediction.h>
 #include <rte_compat.h>
 #include <rte_debug.h>
+
+#ifndef RTE_FORCE_INTRINSICS
+#  error Platform must be built with RTE_FORCE_INTRINSICS
+#endif
 
 #define rte_mb() asm volatile("dmb osh" : : : "memory")
 

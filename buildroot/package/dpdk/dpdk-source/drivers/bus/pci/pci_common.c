@@ -132,49 +132,49 @@ rte_pci_match(const struct rte_pci_driver *pci_drv,
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:02.0") == 0))
 	{
-		printf("trick");
+		printf("trick2\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:03.0") == 0))
 	{
-		printf("trick");
+		printf("trick3\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:04.0") == 0))
 	{
-		printf("trick");
+		printf("trick4\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:05.0") == 0))
 	{
-		printf("trick");
+		printf("trick5\n");
 		return 1; 
 	}
 
 		if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:06.0") == 0))
 	{
-		printf("trick");
+		printf("trick6\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:07.0") == 0))
 	{
-		printf("trick");
+		printf("trick7\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:08.0") == 0))
 	{
-		printf("trick");
+		printf("trick8\n");
 		return 1; 
 	}
 
 	if ((strcmp(pci_drv->driver.name, "net_e1000_em") == 0) && (strcmp(pci_dev->name, "0000:00:09.0") == 0))
 	{
-		printf("trick");
+		printf("trick9\n");
 		return 1; 
 	}
 

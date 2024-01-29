@@ -27,8 +27,8 @@ do_macswap(struct rte_mbuf *pkts[], uint16_t nb,
 		mb = pkts[i];
 
 		eth_hdr = rte_pktmbuf_mtod(mb, struct rte_ether_hdr *);
-		printf("dest %s \n", eth_hdr->d_addr);
-		printf("source %s \n", eth_hdr->s_addr);
+		//printf("dest %s \n", eth_hdr->d_addr);
+		//printf("source %s \n", eth_hdr->s_addr);
 		/* Swap dest and src mac addresses. */
 		rte_ether_addr_copy(&eth_hdr->d_addr, &addr);
 		rte_ether_addr_copy(&eth_hdr->s_addr, &eth_hdr->d_addr);

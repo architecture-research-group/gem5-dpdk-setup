@@ -247,7 +247,8 @@ l2fwd_main_loop(void)
 			portid);
 
 	}
-
+	// Take Checkpoint just before you begin to receive packets
+	m5_checkpoint(0, 0);
 	while (!force_quit) {
 
 		cur_tsc = rte_rdtsc();
@@ -293,6 +294,8 @@ l2fwd_main_loop(void)
 		/*
 		 * Read packet from RX queues
 		 */
+		// Take Checkpoint just before you begin to receive packets
+		//m5_checkpoint(0, 0);
 		for (i = 0; i < qconf->n_rx_port; i++) {
 
 			portid = qconf->rx_port_list[i];
@@ -924,7 +927,7 @@ main(int argc, char **argv)
 	}
 
 	check_all_ports_link_status(l2fwd_enabled_port_mask);
-	m5_checkpoint(0, 0);
+	//m5_checkpoint(0, 0);
 	ret = 0;
 	/* launch per-lcore init on every lcore */
 	rte_eal_mp_remote_launch(l2fwd_launch_one_lcore, NULL, CALL_MAIN);
