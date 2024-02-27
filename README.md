@@ -1,4 +1,4 @@
-# UserSpace_Networking_in_gem5
+# UserSpace Networking in gem5
 This repo contains instructions, benchmarks, and files for running user-space networking in gem5 simulator.
 
 There are three shortcomings in current architectural simulators with respect to evaluating future networked systesm:
