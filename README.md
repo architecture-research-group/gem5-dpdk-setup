@@ -25,7 +25,7 @@ gem5-dpdk-setup
      ┃ ┣ L2TouchFwd
      ┃ ┣ L2TouchDrop
      ┃ ┗ RxpTx
-     ┗ How to run Memcached in gem5
+     ┗ How to run Memcached in real system.
        ┣ MemcachedKernel
        ┗ MemcachedDpdk
 ```
