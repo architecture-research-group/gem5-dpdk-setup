@@ -7,7 +7,7 @@ There are three shortcomings in current architectural simulators with respect to
 - There are limited standardized networking benchmark suite tailored for running in simulators with standardized metrics and evaluation methodology.
 
 In this tutorial, we provide detailed steps on how to enable a popular kernel-bypass framework Data Plane Development Kit (DPDK) in a state-of-the-art simulator (gem5). We developed a highly parameterizable load generator model that can run in gem5, sending requests at configurable rates to a server node running in the same simulation instance. However, these benchmarks also run on a real system as well. The organization of this tutorial is as follows:
-
+```
 gem5-dpdk-setup
  ┗ docs
    ┣ gem5-dir
@@ -28,3 +28,4 @@ gem5-dpdk-setup
      ┗ How to run Memcached in gem5
        ┣ MemcachedKernel
        ┗ MemcachedDpdk
+```
