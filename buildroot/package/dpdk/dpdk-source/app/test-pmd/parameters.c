@@ -141,6 +141,7 @@ usage(char* progname)
 	printf("  --txq=N: set the number of TX queues per port to N.\n");
 	printf("  --txd=N: set the number of descriptors in TX rings to N.\n");
 	// printf("  --proc_cycles=N: set the number of processing cycles to N.\n");
+	printf("  --proc_times=N: set the number of processing time to N ns.\n");
 	printf("  --hairpinq=N: set the number of hairpin queues per port to "
 	       "N.\n");
 	printf("  --burst=N: set the number of packets per burst to N.\n");
