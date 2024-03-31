@@ -1,8 +1,8 @@
-# User-space Networking in gem5
+# Userspace Networking in gem5
 This repo contains instructions, benchmarks, and files for running user-space networking in gem5 simulator.
 
 There are three shortcomings in current architectural simulators with respect to evaluating future networked systesm:
-- Existing simulations have outdate networking subsystem that can at best model a few tens of Gbps network throughput.
+- Existing simulations have outdated networking subsystem that can at best model a few tens of Gbps network throughput.
 - Existing simulators use load generator applications running on different simulated nodes. This can lead to performances limitations and slow down simulation.
 - There are limited standardized networking benchmark suite tailored for running in simulators with standardized metrics and evaluation methodology.
 
