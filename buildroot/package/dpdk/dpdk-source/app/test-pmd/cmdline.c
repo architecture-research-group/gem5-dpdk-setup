@@ -1827,10 +1827,16 @@ cmd_config_rx_tx_parsed(void *parsed_result,
 			return;
 
 		nb_txd = res->value;
-	} else if ( !strcmp(res->name, "proc_cycles")) {
-		if(check_proc_cycles(res->value != 0))
+	} 
+	// else if ( !strcmp(res->name, "proc_cycles")) {
+	// 	if(check_proc_cycles(res->value != 0))
+	// 		return;
+	// 	proc_cycles = res->value;
+	// } 
+	else if ( !strcmp(res->name, "proc_times")) {
+		if(check_proc_cycles(res->value) != 0)
 			return;
-		proc_cycles = res->value;
+		proc_cycles = res->value/10;
 	} else {
 		printf("Unknown parameter\n");
 		return;
