@@ -1,12 +1,14 @@
 # Userspace Networking in gem5
-This repo contains instructions, benchmarks, and files for running userspace networking in gem5 simulator.
+This repo contains instructions, benchmarks, and files for running Intel Data Plane Development Kit (DPDK) in gem5 simulator.
 
 There are three shortcomings in current architectural simulators with respect to evaluating future networked systesm:
-- Existing simulations have outdated networking subsystem that can at best model a few tens of Gbps network throughput.
-- Existing simulators use load generator applications running on different simulated nodes. This can lead to performances limitations and slow down simulation.
-- There are limited standardized networking benchmark suite tailored for running in simulators with standardized metrics and evaluation methodology.
+1. Existing simulations have outdated networking subsystem that can at best model a few tens of Gbps network throughput.
+2. Existing simulators use load generator applications running on different simulated nodes. This can lead to performances limitations and slow down simulation.
+3. There are limited standardized networking benchmark suite tailored for running in simulators with standardized metrics and evaluation methodology.
 
-In this tutorial, we provide detailed steps on how to enable a popular kernel-bypass framework Data Plane Development Kit (DPDK) in a state-of-the-art simulator (gem5). We developed a highly parameterizable load generator model that can run in gem5, sending requests at configurable rates to a server node running in the same simulation instance. However, these benchmarks also run on a real system as well. The organization of this tutorial is as follows:
+In this tutorial, we provide detailed steps on how to enable a popular kernel-bypass framework Data Plane Development Kit (DPDK) in a state-of-the-art simulator (gem5). 
+
+We developed a highly parameterizable load generator model that can run in gem5, sending requests at configurable rates to a server node running in the same simulation instance. However, these benchmarks also run on a real system as well. The organization of this tutorial is as follows:
 ```
 gem5-dpdk-setup
  ┗ docs
@@ -29,3 +31,4 @@ gem5-dpdk-setup
        ┣ MemcachedKernel
        ┗ MemcachedDpdk
 ```
+
