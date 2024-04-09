@@ -17,15 +17,15 @@ If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https:
 - gem5 is supported on Intel, ARM, AMD, Apple M1 architectures
 - Test Node (DUT) running DPDK (Paper results based on ARM Neoverse N1 CPU)
 - Drive Node running pktgen (Paper results based on Intel Xeon Gold 6242R)
-- 100Gbps Mellanox Bluefield ConnectX-5 NIC (Test Node)
-- 100Gbps Mellanox Bluefield ConnectX-6 DX NIC (Drive Node)
+- 100Gbps Mellanox Bluefield ConnectX-5 NIC (Test Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
+- 100Gbps Mellanox Bluefield ConnectX-6 DX NIC (Drive Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
 - If not using devcontainers
   - Install gem5 dependencies (if not using provided docker container). Find [here](https://www.gem5.org/documentation/general_docs/building)
-  - ```export GIT_ROOT=/path/to/gem5_dpdk_setup```
+  - ```export GIT_ROOT=/path/to/gem5-dpdk-setup```
 
 ## Software Information
 - gem5 v21.1.0.2  
-- dpdk v20.11.03 (gem5)  
+- dpdk v20.11.03 ([gem5-dpdk](https://github.com/architecture-research-group/gem5-dpdk-setup/tree/main/buildroot/package/dpdk/dpdk-source))  
 - dpdk v21.11.0 (real system ARM Neoverse N1)  
 
 ### Installing and setting up gem5
@@ -40,7 +40,7 @@ scons build/<ISA>/gem5.fast -j $(nproc)
 scons build/<ISA>/gem5.opt -j $(nproc)
 ```
 ### Installing DPDK (Needed for real system experiments)
-- Modified DPDK v20.11.03 can be found in `/path/to/gem5_dpdk_setup/buildroot/packages/dpdk/dpdk-source`
+- Modified DPDK v20.11.03 can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
 - DPDK v21.11 needed on ARM Neoverse N1
   - clone the dpdk repository
   - apply patch
