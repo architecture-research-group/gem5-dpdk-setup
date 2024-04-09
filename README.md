@@ -14,13 +14,19 @@ In this tutorial, we provide detailed steps on how to use a popular kernel-bypas
 If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more.
 
 ## System Requirements
-- gem5 is supported on Intel, ARM, and AMD architectures (Paper results based on ARM Neoverse N1 CPU)
-- Install gem5 dependencies (if not using provided docker container). Find [here](https://www.gem5.org/documentation/general_docs/building)
+- gem5 is supported on Intel, ARM, AMD, Apple M1 architectures
+- Test Node (DUT) running DPDK (Paper results based on ARM Neoverse N1 CPU)
+- Drive Node running pktgen (Paper results based on Intel Xeon Gold 6242R)
+- 100Gbps Mellanox Bluefield ConnectX-5 NIC (Test Node)
+- 100Gbps Mellanox Bluefield ConnectX-6 DX NIC (Drive Node)
+- If not using devcontainers
+  - Install gem5 dependencies (if not using provided docker container). Find [here](https://www.gem5.org/documentation/general_docs/building)
+  - ```export GIT_ROOT=/path/to/gem5_dpdk_setup```
 
 ## Software Information
 - gem5 v21.1.0.2  
-- dpdk v21.11.03 (gem5)  
-- dpdk v21.11 (real system ARM Neoverse N1)  
+- dpdk v20.11.03 (gem5)  
+- dpdk v21.11.0 (real system ARM Neoverse N1)  
 
 ### Installing and setting up gem5
 - clone the gem5 respository
@@ -29,13 +35,27 @@ git clone https://github.com/architecture-research-group/gem5-dpdk-setup
 ```
 - build `gem5.opt` and `gem5.fast`
 ```
+cd gem5
 scons build/<ISA>/gem5.fast -j $(nproc)
-```
-```
 scons build/<ISA>/gem5.opt -j $(nproc)
 ```
-### Installing dpdk
-- We extended DPDK 
+### Installing DPDK (Needed for real system experiments)
+- Modified DPDK v20.11.03 can be found in `/path/to/gem5_dpdk_setup/buildroot/packages/dpdk/dpdk-source`
+- DPDK v21.11 needed on ARM Neoverse N1
+  - clone the dpdk repository
+  - apply patch
+  - build DPDK (on real system)
+      ```
+      cd dpdk-stable-20.11.3
+      meson setup build && cd build &&
+      ```
+### Installing Pktgen (For Real System Experiment)
+- Modify PKT_GEN IN `dpdk_pktgen.sh` script 
+- source the pktgen installation script
+```
+source dpdk_pktgen.sh
+```
+- download, install, and build pktgen
 
 
 
