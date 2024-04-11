@@ -1,6 +1,6 @@
 # Userspace Networking in gem5
 
-This documentation contains instructions, (real and synthetic) benchmarks, and files for running unmodified Intel Data Plane Development Kit (DPDK) in gem5 simulator.
+This documentation contains instructions, benchmarks, and files for running unmodified Intel&reg; Data Plane Development Kit (DPDK) in gem5 simulator.
 
 There are three shortcomings in current architectural simulators with respect to evaluating future networked systesm:
 1. Existing simulations have outdated networking subsystem that can at best model a few tens of Gbps network throughput.
@@ -20,7 +20,7 @@ If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https:
 - 100Gbps Mellanox Bluefield ConnectX-5 NIC (Test Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
 - 100Gbps Mellanox Bluefield ConnectX-6 DX NIC (Drive Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
 - If not using devcontainers
-  - Install gem5 dependencies (if not using provided docker container). Find [here](https://www.gem5.org/documentation/general_docs/building)
+  - Install gem5 dependencies. Find [`here`](https://www.gem5.org/documentation/general_docs/building)
   - ```export GIT_ROOT=/path/to/gem5-dpdk-setup```
 
 ## Software Information
@@ -39,18 +39,20 @@ cd gem5
 scons build/<ISA>/gem5.fast -j $(nproc)
 scons build/<ISA>/gem5.opt -j $(nproc)
 ```
-### Installing DPDK (Needed for real system experiments)
-- Modified DPDK v20.11.03 can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
+### Installing DPDK (Required for real system experiments)
+- Modified DPDK v20.11.3 `(with new benchmarks)` can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
 - DPDK v21.11 needed on ARM Neoverse N1
   - get DPDK
     ```
-    wget https://fast.dpdk.org/rel/dpdk-20.11.3.tar.gz
+    source dpdk_pktgen.sh
     ```
   - apply patch
+    ```
+    
+    ```
   - build DPDK (on real system)
       ```
-      cd dpdk-stable-20.11.3
-      meson setup build && cd build &&
+      install_dpdk #cli command
       ```
 ### Installing Pktgen (For Real System Experiment)
 - Modify PKT_GEN IN `dpdk_pktgen.sh` script 
