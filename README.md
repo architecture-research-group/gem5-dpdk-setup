@@ -44,29 +44,29 @@ scons build/<ISA>/gem5.opt -j $(nproc)
   ```
   cd build-dpdk-pktgen
   ``` 
-  - Modify the `DPDK_VER` environment variable in `dpdk_pktgen.sh` script (optional)
-  - source the DPDK installation script
-    ```
-    source dpdk_pktgen.sh
-    ```
-  - apply patch
-    ```
-    patch -p1 < dpdk_patch.patch
-    ```
-  - build DPDK (on real system)
-      ```
-      install_dpdk
-      ```
+- Modify the `DPDK_VER` environment variable in `dpdk_pktgen.sh` script (optional)
+- source the DPDK installation script
+  ```
+  source dpdk_pktgen.sh
+  ```
+- apply patch
+  ```
+  patch -p1 < dpdk_patch.patch
+  ```
+- build DPDK (on real system)
+  ```
+  install_dpdk
+  ```
 ### Installing Pktgen (For Real System Experiment)
 - Modify `PKT_VER` environment variable in `dpdk_pktgen.sh` script (optional)
 - source the pktgen installation script
-```
-source dpdk_pktgen.sh
-```
+  ```
+  source dpdk_pktgen.sh
+  ```
 - download, install, and build pktgen
-
-
-
+  ```
+  install_pktgen
+  ```
 
 We also developed a highly parameterizable load generator model that can run in gem5, sending requests at configurable rates to a server node running in the same simulation instance. 
 
