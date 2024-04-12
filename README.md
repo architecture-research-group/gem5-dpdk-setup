@@ -9,10 +9,6 @@ There are three shortcomings in current architectural simulators with respect to
 
 In this tutorial, we provide detailed steps on how to use a popular kernel-bypass framework Data Plane Development Kit [DPDK](https://www.dpdk.org/) in a state-of-the-art computer architecture simulator [gem5](https://www.gem5.org/).
 
-## Getting Started
-
-If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more.
-
 ## System Requirements
 - gem5 is supported on Intel, ARM, AMD, Apple M1 architectures
 - Test Node (DUT) running DPDK (Paper results based on ARM Neoverse N1 CPU)
@@ -26,7 +22,10 @@ If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https:
 ## Software Information
 - gem5 v21.1.0.2  
 - dpdk v20.11.03 ([gem5-dpdk](https://github.com/architecture-research-group/gem5-dpdk-setup/tree/main/buildroot/package/dpdk/dpdk-source))  
-- dpdk v21.11.0 (real system ARM Neoverse N1)  
+- dpdk v21.11.0 (real system ARM Neoverse N1)
+
+## Getting Started
+If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more.
 
 ### Installing and setting up gem5
 - clone the gem5 respository
@@ -42,20 +41,24 @@ scons build/<ISA>/gem5.opt -j $(nproc)
 ### Installing DPDK (Required for real system experiments)
 - Modified DPDK v20.11.3 `(with new benchmarks)` can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
 - DPDK v21.11 needed on ARM Neoverse N1
-  - get DPDK
+  ```
+  cd build-dpdk-pktgen
+  ``` 
+  - Modify the `DPDK_VER` environment variable in `dpdk_pktgen.sh` script (optional)
+  - source the DPDK installation script
     ```
     source dpdk_pktgen.sh
     ```
   - apply patch
     ```
-    
+    patch -p1 < dpdk_patch.patch
     ```
   - build DPDK (on real system)
       ```
-      install_dpdk #cli command
+      install_dpdk
       ```
 ### Installing Pktgen (For Real System Experiment)
-- Modify PKT_GEN IN `dpdk_pktgen.sh` script 
+- Modify `PKT_VER` environment variable in `dpdk_pktgen.sh` script (optional)
 - source the pktgen installation script
 ```
 source dpdk_pktgen.sh
