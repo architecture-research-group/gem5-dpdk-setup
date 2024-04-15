@@ -11,8 +11,8 @@ In this tutorial, we provide detailed steps on how to use a popular kernel-bypas
 
 ## System Requirements
 - gem5 is supported on Intel, ARM, AMD, Apple M1 architectures
-- Test Node (DUT) running DPDK (Paper results based on ARM Neoverse N1 CPU)
-- Drive Node running pktgen (Paper results based on Intel Xeon Gold 6242R)
+- Test Node (DUT) running DPDK (real system ARM Neoverse N1 CPU)
+- Drive Node running pktgen (real system Intel&reg; Sapphire Rapids)
 - 100Gbps Mellanox Bluefield ConnectX-5 NIC (Test Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
 - 100Gbps Mellanox Bluefield ConnectX-6 DX NIC (Drive Node) or any [DPDK-enabled NIC](http://core.dpdk.org/supported/nics/)
 - If not using devcontainers
@@ -22,7 +22,9 @@ In this tutorial, we provide detailed steps on how to use a popular kernel-bypas
 ## Software Information
 - gem5 v21.1.0.2  
 - dpdk v20.11.03 ([gem5-dpdk](https://github.com/architecture-research-group/gem5-dpdk-setup/tree/main/buildroot/package/dpdk/dpdk-source))  
-- dpdk v21.11.0 (real system ARM Neoverse N1)
+- dpdk v21.11.0 (ARM Neoverse N1)
+- dpdk v23.03 (Intel&reg; Sapphire Rapids CPU)
+- pktgen v23.03.0 (Intel&reg; Sapphire Rapids CPU)
 
 ## Getting Started
 If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more.
@@ -38,7 +40,7 @@ cd gem5
 scons build/<ISA>/gem5.fast -j $(nproc)
 scons build/<ISA>/gem5.opt -j $(nproc)
 ```
-### Installing DPDK (Required for real system experiments)
+### Installing DPDK
 - Modified DPDK v20.11.3 `(with new benchmarks)` can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
 - DPDK v21.11 needed on ARM Neoverse N1
   ```
@@ -57,7 +59,8 @@ scons build/<ISA>/gem5.opt -j $(nproc)
   ```
   install_dpdk
   ```
-### Installing Pktgen (For Real System Experiment)
+### Installing Pktgen
+- Follow the steps above to install `dpdk` first before you install `pktgen`
 - Modify `PKT_VER` environment variable in `dpdk_pktgen.sh` script (optional)
 - source the pktgen installation script
   ```
