@@ -2,7 +2,7 @@
 
 # for j in 1GHz 2GHz 3GHz;do
   for i in {1..9..1};do
-    ./l2fwd-ckp-rxptx-10.sh --num-nics 1  --script dpdk-testpmd-rxptx-10.sh --packet-rate $((2150786*$i)) --packet-size 64 --freq 3GHz &
+    taskset -c $(($i-1)) ./l2fwd-ckp-rxptx-10.sh --num-nics 1  --script dpdk-testpmd-rxptx-10.sh --packet-rate $((2150786*$i)) --packet-size 64 --freq 3GHz &
   done
 # done
 

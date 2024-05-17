@@ -1,7 +1,7 @@
 #!/bin/bash
 #wbWidth=4 causes error when you run
-CACHE_CONFIG="--caches --l2cache --l3cache --l3_size 16MB --l3_assoc 16 --ddio-enabled --l1i_size=64kB --l1i_assoc=4 \
---l1d_size=64kB --l1d_assoc=4 --l2_size=1MB --l2_assoc=8 --cacheline_size=64" 
+CACHE_CONFIG="--caches --l2cache --l3cache --l3_size 16MB --l3_assoc 16 --ddio-enabled --l1i_assoc=4 \
+--l1i_size=64kB --l1d_size=64kB --l1d_assoc=4 --l2_assoc=8 --cacheline_size=64" 
 CPU_CONFIG="--param=system.cpu[0:4].l2cache.mshrs=46 --param=system.cpu[0:4].dcache.mshrs=20 \
   --param=system.cpu[0:4].icache.mshrs=20 --param=system.l3.ddio_way_part=4 \
   --param=system.switch_cpus[0:4].decodeWidth=4 --param=system.l3.is_llc=True \
@@ -34,7 +34,7 @@ function run_simulation {
   "$GEM5_DIR/build/ARM/gem5.$GEM5TYPE" $DEBUG_FLAGS --outdir="$RUNDIR" \
   "$GEM5_DIR"/configs/example/fs.py --cpu-type=$CPUTYPE \
   --kernel="$RESOURCES/vmlinux" --disk="$RESOURCES/rootfs.ext2" --bootloader="$RESOURCES/boot.arm64" --root=/dev/sda \
-  --num-cpus=$(($num_nics+3)) --mem-type=DDR4_2400_16x4 --mem-channels=4 --mem-size=65536MB --script="$GUEST_SCRIPT_DIR/$GUEST_SCRIPT" \
+  --num-cpus=$(($num_nics+1)) --mem-type=DDR4_2400_16x4 --mem-channels=4 --mem-size=8192MB --script="$GUEST_SCRIPT_DIR/$GUEST_SCRIPT" \
   --num-nics="$num_nics" --num-loadgens="$num_nics" \
   --checkpoint-dir="$CKPT_DIR" $CONFIGARGS
 }
@@ -46,11 +46,11 @@ fi
 
 GEM5_DIR=${GIT_ROOT}/gem5
 # RESOURCES=${GIT_ROOT}/resources
-RESOURCES=${GIT_ROOT}/resources
+RESOURCES=${GIT_ROOT}/resources-dpdk
 GUEST_SCRIPT_DIR=${GIT_ROOT}/guest-scripts
 
 # parse command line arguments
-TEMP=$(getopt -o 'h' --long take-checkpoint,num-nics:,script:,packet-rate:,packet-size:,loadgen-find-bw,freq:,help -n 'dpdk-loadgen' -- "$@")
+TEMP=$(getopt -o 'h' --long take-checkpoint,num-nics:,script:,packet-rate:,packet-size:,l2-size:,loadgen-find-bw,freq:,help -n 'dpdk-loadgen' -- "$@")
 
 # check for parsing errors
 if [ $? != 0 ]; then
@@ -86,6 +86,10 @@ while true; do
     LOADGENMODE="Increment"
     shift 1
     ;;
+  --l2-size)
+    L2_SIZE=$2
+    shift 2
+    ;;
   --freq)
     Freq=$2
     shift 2
@@ -101,8 +105,8 @@ while true; do
   esac
 done
 
-# CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$GUEST_SCRIPT
-CKPT_DIR=${GIT_ROOT}/ckpts/"ckpts-with-new-vmlinux"/$num_nics"NIC"-$GUEST_SCRIPT
+CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$GUEST_SCRIPT
+# CKPT_DIR=${GIT_ROOT}/ckpts/"ckpts-with-new-vmlinux"/$num_nics"NIC"-$GUEST_SCRIPT
 if [[ -z "$num_nics" ]]; then
   echo "Error: missing argument --num-nics" >&2
   usage
@@ -113,7 +117,7 @@ if [[ -n "$checkpoint" ]]; then
   RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024/$num_nics"NIC-ckp"-$GUEST_SCRIPT
   setup_dirs
   echo "Taking Checkpoint for NICs=$num_nics" >&2
-  GEM5TYPE="opt"
+  GEM5TYPE="fast"
   # packet-size = 0 leads to segfault
   PACKET_SIZE=128
   CPUTYPE="AtomicSimpleCPU"
@@ -132,7 +136,7 @@ else
     usage
   fi
   ((RATE = PACKET_RATE * PACKET_SIZE * 8 / 1024 / 1024 / 1024))
-  RUNDIR=${GIT_ROOT}/rundir/dpdk-testpmd-rxptx-droprate/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT
+  RUNDIR=${GIT_ROOT}/rundir/dpdk-testpmd-rxptx-l2-cache-msb/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT"-l2-cache"-$L2_SIZE
   setup_dirs
 # /dpdk-testpmd-freq-scaling-test
   echo "Running NICs=$num_nics at $RATE GBPS" >&2
@@ -140,7 +144,7 @@ else
   GEM5TYPE="opt"
   LOADGENMODE=${LOADGENMODE:-"Static"}
   DEBUG_FLAGS="--debug-flags=LoadgenDebug" #--debug-start=33952834348" #EthernetAll,EthernetDesc,LoadgenDebug
-  CONFIGARGS="$CACHE_CONFIG $CPU_CONFIG  --cpu-clock=$Freq -r 2 --loadgen-start=26496411250692 --rel-max-tick=400010000000 --packet-rate=$PACKET_RATE --packet-size=$PACKET_SIZE --loadgen-mode=$LOADGENMODE \
+  CONFIGARGS="$CACHE_CONFIG $CPU_CONFIG --l2_size=$L2_SIZE --cpu-clock=$Freq -r 2 --loadgen-start=6434903293239 --rel-max-tick=400010000000 --packet-rate=$PACKET_RATE --packet-size=$PACKET_SIZE --loadgen-mode=$LOADGENMODE \
   --warmup-dpdk 200000000000"
   run_simulation > ${RUNDIR}/simout
   exit

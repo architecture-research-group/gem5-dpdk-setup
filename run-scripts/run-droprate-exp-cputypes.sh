@@ -9,8 +9,26 @@
 # wait
 
 for j in MinorCPU;do
-  for i in {3..9..1};do
-    ./l2fwd-ckp-cputypes.sh --num-nics 1  --script dpdk-testpmd.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --cpu-type $j &
+  for i in {8..17..1};do
+    ./l2fwd-ckp-cputypes.sh --num-nics 1  --script dpdk-testpmd-rxptx-1.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --cpu-type $j &
+  done
+done
+
+for j in MinorCPU;do
+  for i in {1..7..1};do
+    ./l2fwd-ckp-cputypes-100.sh --num-nics 1  --script dpdk-testpmd-rxptx-100.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --cpu-type $j &
+  done
+done
+
+for j in MinorCPU;do
+  for i in {50..58..1};do
+    ./l2fwd-ckp-cputypes.sh --num-nics 1  --script dpdk-testpmd-rxptx-1.sh --packet-rate $((88418*$i)) --packet-size 1518 --freq 3GHz --cpu-type $j &
+  done
+done
+
+for j in MinorCPU;do
+  for i in {40..58..1};do
+    ./l2fwd-ckp-cputypes-100.sh --num-nics 1  --script dpdk-testpmd-rxptx-100.sh --packet-rate $((88418*$i)) --packet-size 1518 --freq 3GHz --cpu-type $j &
   done
 done
 

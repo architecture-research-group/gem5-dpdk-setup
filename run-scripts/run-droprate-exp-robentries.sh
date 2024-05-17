@@ -8,13 +8,29 @@
 
 # wait
 
-for j in 256 4096 16384 32768;do
-  for i in {15..19..1};do
-    ./l2fwd-ckp-btbentries.sh --num-nics 1  --script dpdk-testpmd.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --btb-entries $j &
+for j in 32 128 256 512;do
+  for i in {8..17..1};do
+    ./l2fwd-ckp-robentries.sh --num-nics 1  --script dpdk-testpmd-rxptx-1.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --rob $j &
   done
 done
 
-# wait
+for j in 32 128 256 512;do
+  for i in {1..7..1};do
+    ./l2fwd-ckp-robentries-100.sh --num-nics 1  --script dpdk-testpmd-rxptx-100.sh --packet-rate $((2150786*$i/2)) --packet-size 128 --freq 3GHz --rob $j &
+  done
+done
+
+for j in 32 128 256 512;do
+  for i in {50..58..1};do
+    ./l2fwd-ckp-robentries.sh --num-nics 1  --script dpdk-testpmd-rxptx-1.sh --packet-rate $((88418*$i)) --packet-size 1518 --freq 3GHz --rob $j &
+  done
+done
+
+for j in 32 128 256 512;do
+  for i in {40..58..1};do
+    ./l2fwd-ckp-robentries-100.sh --num-nics 1  --script dpdk-testpmd-rxptx-100.sh --packet-rate $((88418*$i)) --packet-size 1518 --freq 3GHz --rob $j &
+  done
+done
 
 # for j in 1GHz 2GHz 3GHz;do
 #   for i in {21..25..1};do
@@ -144,7 +160,7 @@ done
 
 # # wait 
 
-# for j in 256 4096 16384 32768;do
+# for j in 32 128 256 512;do
 #   for i in {51..57..1};do
 #     ./l2fwd-ckp-btbentries.sh --num-nics 1  --script dpdk-testpmd.sh --packet-rate $((88418*$i)) --packet-size 1518 --freq 3GHz --btb-entries $j &
 #   done

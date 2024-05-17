@@ -1,6 +1,6 @@
 #!/bin/bash
 #wbWidth=4 causes error when you run
-CACHE_CONFIG="--caches --l2cache --l3cache --l3_assoc 16 --ddio-enabled --l1i_size=64kB --l1i_assoc=4 \
+CACHE_CONFIG="--caches --l2cache --l3cache --l3_size 16MB --l3_assoc 16 --ddio-enabled --l1i_size=64kB --l1i_assoc=4 \
 --l1d_size=64kB --l1d_assoc=4 --l2_size=1MB --l2_assoc=8 --cacheline_size=64" 
 CPU_CONFIG="--param=system.cpu[0:4].l2cache.mshrs=46 --param=system.cpu[0:4].dcache.mshrs=20 \
   --param=system.cpu[0:4].icache.mshrs=20 --param=system.l3.ddio_way_part=4 \
@@ -50,7 +50,7 @@ RESOURCES=${GIT_ROOT}/resources-dpdk
 GUEST_SCRIPT_DIR=${GIT_ROOT}/guest-scripts
 
 # parse command line arguments
-TEMP=$(getopt -o 'h' --long take-checkpoint,num-nics:,script:,packet-rate:,packet-size:,l3-size:,loadgen-find-bw,freq:,help -n 'dpdk-loadgen' -- "$@")
+TEMP=$(getopt -o 'h' --long take-checkpoint,num-nics:,script:,packet-rate:,packet-size:,cpu-type:,loadgen-find-bw,freq:,help -n 'dpdk-loadgen' -- "$@")
 
 # check for parsing errors
 if [ $? != 0 ]; then
@@ -82,16 +82,16 @@ while true; do
     PACKET_RATE="$2"
     shift 2
     ;;
-  --l3-size)
-    L3="$2"
-    shift 2
-    ;;
   --loadgen-find-bw)
     LOADGENMODE="Increment"
     shift 1
     ;;
   --freq)
     Freq=$2
+    shift 2
+    ;;
+  --cpu-type)
+    CPUTYPE=$2
     shift 2
     ;;
   -h | --help)
@@ -105,8 +105,8 @@ while true; do
   esac
 done
 
-# CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$GUEST_SCRIPT
 CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$GUEST_SCRIPT
+# CKPT_DIR=${GIT_ROOT}/ckpts/"ckpts-with-new-vmlinux"/$num_nics"NIC"-$GUEST_SCRIPT
 if [[ -z "$num_nics" ]]; then
   echo "Error: missing argument --num-nics" >&2
   usage
@@ -114,16 +114,16 @@ fi
 
 if [[ -n "$checkpoint" ]]; then
   # RUNDIR=${GIT_ROOT}/rundir/$num_nics"NIC-ckp"-$GUEST_SCRIPT
-  RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024-rebuttal/$num_nics"NIC-ckp"-$GUEST_SCRIPT
+  RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024/$num_nics"NIC-ckp"-$GUEST_SCRIPT
   setup_dirs
   echo "Taking Checkpoint for NICs=$num_nics" >&2
   GEM5TYPE="fast"
   # packet-size = 0 leads to segfault
   PACKET_SIZE=128
   CPUTYPE="AtomicSimpleCPU"
-  CONFIGARGS="--max-checkpoints 2 --cpu-clock=$Freq --loadgen-start=2628842328231400"
-  # CONFIGARGS="--max-checkpoints 1 -r 1 --cpu-clock=$Freq --loadgen-start=2628842328231400"
-  run_simulation > $RUNDIR/simout
+  # CONFIGARGS="--max-checkpoints 2 --cpu-clock=$Freq"
+  CONFIGARGS="--max-checkpoints 1 -r 1 --cpu-clock=$Freq"
+  run_simulation
   exit 0
 else
   if [[ -z "$PACKET_SIZE" ]]; then
@@ -136,15 +136,15 @@ else
     usage
   fi
   ((RATE = PACKET_RATE * PACKET_SIZE * 8 / 1024 / 1024 / 1024))
-  RUNDIR=${GIT_ROOT}/rundir/llc-missrate-rxptx-4096/dpdk-testpmd-rxptx-1000-droprate/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT
+  RUNDIR=${GIT_ROOT}/rundir/dpdk-testpmd-cputypes-exps/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT"-cputypes-"$CPUTYPE
   setup_dirs
 # /dpdk-testpmd-freq-scaling-test
   echo "Running NICs=$num_nics at $RATE GBPS" >&2
-  CPUTYPE="O3_ARM_v7a_3"
+  # CPUTYPE="O3_ARM_v7a_3"
   GEM5TYPE="opt"
   LOADGENMODE=${LOADGENMODE:-"Static"}
   DEBUG_FLAGS="--debug-flags=LoadgenDebug" #--debug-start=33952834348" #EthernetAll,EthernetDesc,LoadgenDebug
-  CONFIGARGS="$CACHE_CONFIG $CPU_CONFIG --l3_size $L3 --cpu-clock=$Freq -r 2 --loadgen-start=6434954473341 --rel-max-tick=400010000000 --packet-rate=$PACKET_RATE --packet-size=$PACKET_SIZE --loadgen-mode=$LOADGENMODE \
+  CONFIGARGS="$CACHE_CONFIG --cpu-clock=$Freq -r 2 --loadgen-start=9402894808428 --rel-max-tick=400010000000 --packet-rate=$PACKET_RATE --packet-size=$PACKET_SIZE --loadgen-mode=$LOADGENMODE \
   --warmup-dpdk 200000000000"
   run_simulation > ${RUNDIR}/simout
   exit

@@ -136,7 +136,7 @@ else
     usage
   fi
   ((RATE = PACKET_RATE * PACKET_SIZE * 8 / 1024 / 1024 / 1024))
-  RUNDIR=${GIT_ROOT}/rundir/llc-missrate-rxptx-4096/dpdk-testpmd-rxptx-1000-droprate/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT
+  RUNDIR=${GIT_ROOT}/rundir/llc-missrate-rxptx-4096/dpdk-testpmd-rxptx-70-droprate/$num_nics"NIC-"$PACKET_SIZE"SIZE-"$PACKET_RATE"RATE-"$RATE"Gbps-ddio-enabled"-$GUEST_SCRIPT
   setup_dirs
 # /dpdk-testpmd-freq-scaling-test
   echo "Running NICs=$num_nics at $RATE GBPS" >&2
