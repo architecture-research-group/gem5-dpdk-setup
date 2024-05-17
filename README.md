@@ -44,16 +44,12 @@ scons build/<ISA>/gem5.opt -j $(nproc)
 - Modified DPDK v20.11.3 `(with new benchmarks)` can be found in `/path/to/gem5-dpdk-setup/buildroot/package/dpdk/dpdk-source`
 - DPDK v21.11 needed on ARM Neoverse N1
   ```
-  cd build-dpdk-pktgen
+  cd dpdk-pktgen-build
   ``` 
 - Modify the `DPDK_VER` environment variable in `dpdk_pktgen.sh` script (optional)
 - source the DPDK installation script
   ```
   source dpdk_pktgen.sh
-  ```
-- apply patch
-  ```
-  patch -p1 < dpdk_patch.patch
   ```
 - build DPDK (on real system)
   ```
