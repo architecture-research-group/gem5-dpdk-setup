@@ -444,7 +444,7 @@ def build_drive_system(np):
                                               voltage_domain =
                                               drive_sys.cpu_voltage_domain)
     
-    # I need to create more than one cpu
+    # JOHNSON I need to create more than one cpu
     # drive_sys.cpu = DriveCPUClass(clk_domain=drive_sys.cpu_clk_domain,
     #                               cpu_id=0)
     drive_sys.cpu = [DriveCPUClass(clk_domain=test_sys.cpu_clk_domain, cpu_id=i)

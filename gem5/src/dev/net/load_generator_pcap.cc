@@ -46,6 +46,7 @@ LoadGeneratorPcap::LoadGeneratorPcap(const LoadGeneratorPcapParams &p)
       incrementInterval(p.increment_interval),
       lastRxCount(0),
       lastTxCount(0),
+      count_packets(0),
       pcapFilename(p.pcap_filename),
       sendPacketEvent([this] { sendPacket(); }, name()),
       checkLossEvent([this] { checkLoss(); }, name()),
@@ -151,13 +152,12 @@ void LoadGeneratorPcap::buildEthernetHeader(EthPacketPtr ethpacket) const {
 
 void LoadGeneratorPcap::sendPacket() {
   DPRINTF(LoadgenDebug, "LoadGenPcap::sendPacket executed\n");
-
   // Read a packet from pcap file.
   pcap_pkthdr *pcap_header;
   const u_char *pcap_data;
   if (pcap_h != nullptr) {
     int ret = pcap_next_ex(pcap_h, &pcap_header, &pcap_data);
-    if (ret < 0) {
+    if (ret < 0) { // || count_packets >= 500) {
       // Perhaps EOF.
       DPRINTF(LoadgenDebug, "End of pcap trace is reached!\n");
       DPRINTF(LoadgenDebug, "Nothing will be scheduled in the loadgen, exiting here.\n");
@@ -243,6 +243,7 @@ void LoadGeneratorPcap::sendPacket() {
   } else {
     // For DPDK stack, just change the Ethernet header and copy the rest.
     // DPRINTF(LoadgenDebug, "Pcap header len size is %d\n", pcap_header->len);
+    // count_packets++;
     buildEthernetHeader(txPacket);
     pcap_data += sizeof(ether_header);
     memcpy(txPacket->data + kEtherHeaderSize, pcap_data,

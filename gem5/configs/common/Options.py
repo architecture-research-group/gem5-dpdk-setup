@@ -318,7 +318,7 @@ def addCommonOptions(parser):
         type=str,
         help="Time to schedule the first dist synchronisation barrier\n"
         "DEFAULT:10000000000t")
-    parser.add_argument("--ethernet-linkspeed", default="1000Gbps",
+    parser.add_argument("--ethernet-linkspeed", default="100Gbps",
                         action="store", type=str,
                         help="Link speed in bps\nDEFAULT: 10Gbps")
     parser.add_argument("--ethernet-linkdelay", default="10us",

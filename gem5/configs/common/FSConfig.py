@@ -211,7 +211,7 @@ def makeArmSystem(mem_mode, machine_type, num_cpus=1, mdesc=None,
                                               port_filter = loadgen_kwargs['loadgen_port_filter']))
         else:
             fatal("Unknown type of the load generator")
-        links.append(EtherLink(speed = '1000Gbps'))
+        links.append(EtherLink(speed = '100Gbps'))
         links[i].int0 = nics[i].interface
         links[i].int1 = loadgens[i].interface
     

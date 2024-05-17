@@ -45,6 +45,8 @@ class LoadGeneratorPcap : public SimObject {
   uint64_t lastRxCount;
   uint64_t lastTxCount;
 
+  int count_packets;
+
   // Pcap related configuration.
   std::string pcapFilename;
   pcap_t *pcap_h;
