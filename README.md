@@ -92,7 +92,7 @@ We also developed a highly parameterizable load generator model that can run in 
 <!--       ┣ MemcachedKernel -->
 <!--       ┗ MemcachedDpdk -->
 
-## Visit [Wiki](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki) on how to run:
+## Visit [wiki](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki) on how to run:
 - DPDK in gem5
 - Memcached in gem5
 - DPDK in real system
