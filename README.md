@@ -81,7 +81,7 @@ We also developed a highly parameterizable load generator model that can run in 
 <!--   ┃ ┃ ┗ RxpTx -->
 <!--   ┃ ┗ How to run Memcached in gem5 -->
 <!--   ┃   ┣ MemcachedKernel -->
-<!--   ┃   ┗ MemcachedDpdkm -->
+<!--   ┃   ┗ MemcachedDpdk -->
 <!--   ┗ real-system-dir -->
 <!--     ┣ How to run DPDK in real system. -->
 <!--     ┃ ┣ TestPMD -->
