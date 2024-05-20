@@ -15,16 +15,39 @@
 #include <rte_ether.h>
 #include <rte_mbuf.h>
 #include <rte_pdump.h>
+#include <rte_malloc.h>
 
 // Global DPDK configs.
 static const char *kPacketMemPoolName = "dpdk_packet_mem_pool";
 
 #define kRingN 1
-#define kRingDescN 2048
+#define kRingDescN 1024
 #define kMTUStandardFrames 1500
 #define kMTUJumboFrames 9000
 #define kLinkTimeOut_ms 100
 #define kMaxBurstSize 1
+
+// To implement new tx pipeline
+#define BURST_TX_DRAIN_US 1000000 /* TX drain every ~100us */
+#define MAX_RX_QUEUE_PER_LCORE 16
+#define MAX_TX_QUEUE_PER_PORT 16
+
+/* Per-port statistics struct */
+struct fwd_port_statistics {
+	uint64_t tx;
+	uint64_t rx;
+	uint64_t dropped;
+} __rte_cache_aligned;
+struct fwd_port_statistics port_statistics[RTE_MAX_ETHPORTS];
+
+// struct lcore_queue_conf {
+// 	unsigned n_rx_port;
+// 	unsigned rx_port_list[MAX_RX_QUEUE_PER_LCORE];
+// } __rte_cache_aligned;
+
+// struct lcore_queue_conf lcore_queue_conf[RTE_MAX_LCORE];
+// static uint64_t timer_period = 10; /* default period is 10 seconds */
+static struct rte_eth_dev_tx_buffer *tx_buffer[RTE_MAX_ETHPORTS];
 
 // Main DPDK struct.
 struct DPDKObj {
@@ -36,6 +59,11 @@ struct DPDKObj {
   uint16_t pmd_ports[RTE_MAX_ETHPORTS];
   struct rte_ether_addr pmd_eth_addrs[RTE_MAX_ETHPORTS];
   uint16_t pmd_port_to_use; // This port will be used throughout this object.
+
+  // Implementing a new transmit pipeline
+  // struct lcore_queue_conf *qconf;
+  // struct rte_eth_dev_tx_buffer *buffer;
+  unsigned lcore_id;
 
   // TX and RX buffers.
   uint16_t rx_burst_size;
@@ -55,7 +83,7 @@ static int InitDPDK(struct DPDKObj *dpdk_obj) {
   int dargv_cnt = 0;
   char *dargv[kDpdkArgcMax];
   dargv[dargv_cnt++] = (char *)"-l";
-  dargv[dargv_cnt++] = (char *)"0";
+  dargv[dargv_cnt++] = (char *)"0-3";
   dargv[dargv_cnt++] = (char *)"-n";
   dargv[dargv_cnt++] = (char *)"1";
   dargv[dargv_cnt++] = (char *)"--proc-type";
@@ -154,14 +182,16 @@ static int InitDPDK(struct DPDKObj *dpdk_obj) {
 
   // Setup RX/TX rings (queues).
   for (int i = 0; i < kRingN; i++) {
+    //dev_info.default_txconf.tx_free_thresh = 128;
     int ret = rte_eth_tx_queue_setup(pmd_port_id, i, tx_ring_desc_N_actual,
                                      (unsigned int)SOCKET_ID_ANY,
                                      &dev_info.default_txconf);
+    // fprintf(stderr, "tx_free_thresh: %d\n", dev_info.default_txconf.tx_free_thresh);
     if (ret) {
       fprintf(stderr, "Failed to setup TX queues for ring %d\n", i);
       return -1;
     }
-
+    //dev_info.default_rxconf.rx_free_thresh = 128;
     ret = rte_eth_rx_queue_setup(pmd_port_id, i, rx_ring_desc_N_actual,
                                  (unsigned int)SOCKET_ID_ANY,
                                  &dev_info.default_rxconf, dpdk_obj->mpool);
@@ -169,7 +199,28 @@ static int InitDPDK(struct DPDKObj *dpdk_obj) {
       fprintf(stderr, "Failed to setup RX queues for ring %d\n", i);
       return -1;
     }
+    // fprintf(stderr, "rx_free_thresh: %d\n", dev_info.default_rxconf.rx_free_thresh);
   }
+
+
+  /* Initialize TX buffers */
+  uint16_t portid = dpdk_obj->pmd_ports[dpdk_obj->pmd_port_to_use];
+  tx_buffer[portid] = (struct rte_eth_dev_tx_buffer *) rte_zmalloc_socket("tx_buffer",
+      RTE_ETH_TX_BUFFER_SIZE(kMaxBurstSize), 0,
+      rte_eth_dev_socket_id(portid));
+  if (tx_buffer[portid] == NULL)
+    rte_exit(EXIT_FAILURE, "Cannot allocate buffer for tx on port %u\n",
+        portid);
+
+  rte_eth_tx_buffer_init(tx_buffer[portid], kMaxBurstSize);
+
+  ret = rte_eth_tx_buffer_set_err_callback(tx_buffer[portid],
+      rte_eth_tx_buffer_count_callback,
+      &port_statistics[portid].dropped);
+  if (ret < 0)
+    rte_exit(EXIT_FAILURE,
+    "Cannot set error callback for tx buffer on port %u\n",
+        portid);
 
   // Start port.
   ret = rte_eth_dev_start(pmd_port_id);
@@ -255,6 +306,7 @@ static void AppendPacketHeader(struct DPDKObj *dpdk_obj, struct rte_mbuf *pckt,
   size_t pkt_size = sizeof(struct rte_ether_hdr) + length;
   pckt->data_len = pkt_size;
   pckt->pkt_len = pkt_size;
+  // fprintf(stderr, "After appending packet header, pkt_size is %lu\n", pkt_size);
 
   // Ethernet header.
   struct rte_ether_hdr *eth_hdr =
@@ -282,9 +334,38 @@ static int SendBatch(struct DPDKObj *dpdk_obj) {
                           (unsigned int)(burst_size - pckt_sent));
     return -1;
   }
-
+  // rte_pktmbuf_free_bulk(dpdk_obj->tx_mbufs, burst_size);
   dpdk_obj->tx_burst_ptr = 0;
   return 0;
+}
+
+// Send a batch of packets sitting so far in tx_mbuf's.
+static int SendBuffer(struct DPDKObj *dpdk_obj, struct rte_mbuf *pckt) {
+  // Send packet.
+  uint16_t pckt_sent;
+  const uint16_t ring_id = 0;
+  struct rte_eth_dev_tx_buffer *buffer;
+  const uint16_t burst_size = dpdk_obj->tx_burst_size;
+
+  buffer = tx_buffer[dpdk_obj->pmd_ports[dpdk_obj->pmd_port_to_use]];
+  pckt_sent = rte_eth_tx_buffer(dpdk_obj->pmd_ports[dpdk_obj->pmd_port_to_use],ring_id,buffer,pckt);
+  
+  if(!pckt_sent)
+    return 0;
+  else {
+    if(pckt_sent == kMaxBurstSize) {
+      //fprintf(stderr, "DPDK-Version of Memcached Server is sending out %d Packets (from rte_eth_tx_buffer() API) in a single Burst!\n", (int) pckt_sent);
+      //rte_pktmbuf_free(dpdk_obj->tx_mbufs[i]);
+      dpdk_obj->tx_burst_ptr = 0;
+      return 0;
+    }
+    else{
+      //fprintf(stderr, "Failed to send all %d packets (from rte_eth_tx_buffer() API), only %d was sent.\n",
+      //      burst_size, pckt_sent);
+      // rte_pktmbuf_free_bulk(dpdk_obj->tx_mbufs, pckt_sent); //We explicitly free sent pckts -> rte_eth_tx_buffer will free unsent pckts
+      return -1;
+    }
+  }
 }
 
 // Receive one or many packets and store them in pckts.

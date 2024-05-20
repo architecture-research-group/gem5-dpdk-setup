@@ -89,15 +89,16 @@ static void HelperParseSetReqHeader(const struct ReqHdr *hdr, uint8_t **key,
   *key_len = key_len_;
   *val_len = val_len_;
 }
-
+static const uint32_t kExtraSizeForGet = 0; //Johnson
 static size_t HelperFormGetReqHeader(struct ReqHdr *hdr, uint16_t key_len) {
-  uint32_t total_payld_length = key_len;
+  uint32_t total_payld_length = key_len + kExtraSizeForGet;
 
   memset(hdr, 0x00, sizeof(struct ReqHdr));
   hdr->magic = 0x80;  // req
   hdr->opcode = 0x00; // get
   hdr->key_length[0] = (uint8_t)((key_len >> 8) & 0xff);
   hdr->key_length[1] = (uint8_t)(key_len & 0xff);
+  hdr->extra_length = kExtraSizeForGet; //Johnson
   hdr->total_body_length[0] = (uint8_t)((total_payld_length >> 24) & 0xff);
   hdr->total_body_length[1] = (uint8_t)((total_payld_length >> 16) & 0xff);
   hdr->total_body_length[2] = (uint8_t)((total_payld_length >> 8) & 0xff);

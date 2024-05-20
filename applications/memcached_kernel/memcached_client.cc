@@ -8,6 +8,9 @@
 #include <random>
 #include <tuple>
 #include <vector>
+#ifdef _GEM5_
+  #include <gem5/m5ops.h>
+#endif
 
 DEFINE_string(server_mac, "11:22:33:44:55:66",
               "MAC address of the memcached server.");
@@ -101,12 +104,17 @@ int main(int argc, char *argv[]) {
   std::cout << "Dataset generated.\n";
 
   // Execute the load.
-  std::cout << "Now you can run PCAP trace recorder.\n";
-  std::cout << "Press <Ctrl-C> to populate server with the workload...\n";
-  while (!kCtlzArmed) {
-    sleep(1);
-  }
-  kCtlzArmed = false;
+  //std::cout << "Now you can run PCAP trace recorder.\n";
+  //std::cout << "Press <Ctrl-C> to populate server with the workload...\n";
+  //while (!kCtlzArmed) {
+  //  sleep(1);
+  //}
+  //kCtlzArmed = false; 
+#ifdef _GEM5_
+  std::cout << "dumping, resetting stats and taking checkpoint before populating the Memcached server . . . \n";
+  m5_dump_reset_stats(0, 0);
+  m5_checkpoint(0, 0);
+#endif
 
   // Populate memcached server with the dataset.
   size_t populate_ds_size = FLAGS_populate_workload_size;
@@ -144,14 +152,19 @@ int main(int argc, char *argv[]) {
             << " OK response count: " << ok_responses_recved << "\n";
 
   // Execute the load.
-  std::cout << "If you want a separate trace for the workoad benchark, now it's a good time to start capturing it.\n";
-  std::cout << "Press <Ctrl-C> to execute the workload...\n";
-  while (!kCtlzArmed) {
-    sleep(1);
-  }
+  //std::cout << "If you want a separate trace for the workoad benchark, now it's a good time to start capturing it.\n";
+  //std::cout << "Press <Ctrl-C> to execute the workload...\n";
+  //while (!kCtlzArmed) {
+  //  sleep(1);
+  //}
   // De-register the signal.
   signal(SIGINT, SIG_DFL);
-
+#ifdef _GEM5_	
+  std::cout << "dumping, resetting stats and taking another checkpoint before we begin the request/response phase . . . \n";
+  //system("m5 checkpoint");
+  m5_dump_reset_stats(0, 0);
+  m5_checkpoint(0, 0);
+#endif
   size_t wrkl_size;
   float wrkl_get_frac;
   sscanf(FLAGS_workload_config.c_str(), "%lu-%f", &wrkl_size, &wrkl_get_frac);
@@ -183,6 +196,7 @@ int main(int argc, char *argv[]) {
       size_t key_idx = populate_ds_size + (set_cnt % num_of_unique_sets);
       client.Set(i, 0, dset_keys[key_idx].data(), dset_keys[key_idx].size(),
                  dset_vals[key_idx].data(), dset_vals[key_idx].size());
+      ++set_cnt; // JOHNSON
     }
     ++batch_cnt;
 
@@ -230,6 +244,9 @@ int main(int argc, char *argv[]) {
   std::cout << "   * OK GET responses: " << ok_get_responses_recved << "\n";
   std::cout << "   * OK total responses: "
             << ok_set_responses_recved + ok_get_responses_recved << "\n";
-
+#ifdef _GEM5_
+  std::cout << "Exiting Memcached Client . . . \n";
+  m5_exit(0);
+#endif
   return 0;
 }

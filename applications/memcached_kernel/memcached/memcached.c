@@ -65,6 +65,12 @@
 
 #include "../dpdk.h"
 #include "../helpers.h"
+//JOHNSON
+#include <rte_cycles.h>
+#include <rte_common.h>
+#include <rte_prefetch.h>
+#include <rte_branch_prediction.h>
+
 
 /*
  * forward declarations
@@ -140,7 +146,7 @@ int perform_get(const struct ReqHdr *p_hdr, uint8_t** val, uint32_t *val_len);
 size_t process_through_memcached(uint8_t* rx_buff_ptr, uint8_t* tx_buff_ptr) {
     struct MemcacheUdpHeader *hdr = (struct MemcacheUdpHeader*)rx_buff_ptr;
     if (hdr->RESERVED[0] != kMagicMagic[0] || hdr->RESERVED[1] != kMagicMagic[1]) {
-        fprintf(stderr, "Critical error: unexpexted packet received!\n");
+        fprintf(stderr, "Critical error: unexpected packet received!\n");
         return 0;
     }
     rx_buff_ptr += sizeof(struct MemcacheUdpHeader);
@@ -159,20 +165,22 @@ size_t process_through_memcached(uint8_t* rx_buff_ptr, uint8_t* tx_buff_ptr) {
     // Parse type of request.
     if (p_hdr->opcode == 0x01) {
         // SET.
+        // fprintf(stderr, "\n**** Encountered a SET request ****\n");
         int res = perform_set(p_hdr);
-
+        
         // Set the response.
         if (res == 0) {
             rsp_hdr->status[0] = 0x00;  // Send success.
         } else {
             rsp_hdr->status[0] = 0xff;  // Send failure.
         }
-
+        
         return sizeof(struct MemcacheUdpHeader) + sizeof(struct RespHdr);
     } else if (p_hdr->opcode == 0x00) {
         // GET.
         uint8_t *value;
         uint32_t value_len;
+        // fprintf(stderr, "\n**** Encountered a GET request ****\n");
         int res = perform_get(p_hdr, &value, &value_len);
 
         // Set the response.
@@ -183,13 +191,18 @@ size_t process_through_memcached(uint8_t* rx_buff_ptr, uint8_t* tx_buff_ptr) {
             rsp_hdr->total_body_length[2] = (body_len >> 8) & 0xff;
             rsp_hdr->total_body_length[3] = (body_len) & 0xff;
             rsp_hdr->status[0] = 0x00;  // Send success.
-            uint8_t *rsp_data = (uint8_t*)rsp_hdr + sizeof(struct RespHdr);
+            uint8_t *rsp_data = (uint8_t*)(rsp_hdr + sizeof(struct RespHdr));
             memcpy(rsp_data, value, value_len);
+            // JOHNSON -  This is not needed because tx_buff_ptr already contains values as it points to rsp_data through rsp_hdr on lines 158 & 194  
+            // tx_buff_ptr += sizeof(struct RespHdr);
+            // memcpy(tx_buff_ptr, value, value_len);
         } else {
             rsp_hdr->status[0] = 0xff;  // Send failure.
-	    value_len=0; //Johnson
+	        // JOHNSON
+	        value_len = 0;
+            // return sizeof(struct MemcacheUdpHeader) + sizeof(struct RespHdr);
         }
-
+        // fprintf(stderr, "\"GET\" Packet size in bytes is %lu\n", sizeof(struct MemcacheUdpHeader) + sizeof(struct RespHdr) + value_len);
         return sizeof(struct MemcacheUdpHeader) + sizeof(struct RespHdr) + value_len;
     }
 }
@@ -201,13 +214,13 @@ int perform_set(const struct ReqHdr *p_hdr) {
     uint32_t val_len;
     HelperParseSetReqHeader(p_hdr, &key, &key_len, &val, &val_len);
 
-    // fprintf(stderr, "SET: \n");
+    // fprintf(stderr, "SET: \nkeys: [");
     // for (int i=0; i<key_len; ++i)
     //   fprintf(stderr, "%d ", (int)(*(key + i)));
-    // fprintf(stderr, "   |   ");
+    // fprintf(stderr, "] \nvalues: [");
     // for (int i=0; i<val_len; ++i)
     //    fprintf(stderr, "%d ", (int)(*(val + i)));
-    // fprintf(stderr, "\n");
+    // fprintf(stderr, "]\n");
 
     // Store.
     // Allocate item.
@@ -252,6 +265,13 @@ int perform_get(const struct ReqHdr *p_hdr, uint8_t** val, uint32_t *val_len) {
     if (it != NULL) {
         *val = ITEM_data(it);
         *val_len = it->nbytes;
+        // fprintf(stderr, "GET: \nkeys: [");
+        //  for (int i=0; i<key_len; ++i)
+        //      fprintf(stderr, "%d ", (int)(*(key + i)));
+        //  fprintf(stderr, "] \nvalues: [");
+        //  for (int i=0; i<*val_len; ++i)
+        //      fprintf(stderr, "%d ", (int)(*(*val + i)));
+        // fprintf(stderr, "]\n");
         return 0;
     } else {
         return -1;
@@ -6358,6 +6378,20 @@ int main (int argc, char **argv) {
         return -1;
     }
 
+	uint16_t pckt_sent;
+    struct rte_eth_dev_tx_buffer *buffer;
+	uint64_t prev_tsc, diff_tsc, cur_tsc, timer_tsc;
+	unsigned i, j;
+    uint16_t portid;
+	const uint64_t drain_tsc = (rte_get_tsc_hz() + US_PER_S - 1) / US_PER_S *
+			BURST_TX_DRAIN_US;
+
+	prev_tsc = 0;
+	timer_tsc = 0;
+
+	// dpdk.lcore_id = rte_lcore_id();
+    // dpdk.qconf = &lcore_queue_conf[dpdk.lcore_id];
+
     /* If we are in simulation, take checkpoint here. */
 #ifdef _GEM5_
     fprintf(stderr, "Taking post-initialization checkpoint.\n");
@@ -6365,34 +6399,125 @@ int main (int argc, char **argv) {
 #endif
 
     fprintf(stderr, "DPDK-version of memcached is ready to accept requests!\n");
-    while (!stop_main_loop) {
-        uint16_t received_pckt_cnt = RecvOverDPDK(&dpdk);
-        if (received_pckt_cnt == 0) continue;
+     while (!stop_main_loop) {
+         uint16_t received_pckt_cnt = RecvOverDPDK(&dpdk);
+         if (received_pckt_cnt == 0) continue;
+
+         // Prepare response buffer.
+         AllocateDPDKTxBuffers(&dpdk, received_pckt_cnt);
+
+         // fprintf(stderr, "DPDK-Version of Memcached Server received %d Packets in a single Bursts!\n", (int)received_pckt_cnt);
+
+         for (int i = 0; i < received_pckt_cnt; ++i) {
+             struct rte_mbuf *rx_mbuf = GetNextDPDKRxBuffer(&dpdk);
+             struct rte_mbuf *tx_mbuf = GetNextDPDKTxBuffer(&dpdk);
+             assert(rx_mbuf != NULL);
+             assert(tx_mbuf != NULL);
+
+             // Process through memcached.
+             uint8_t *rx_buff_ptr = ExtractPacketPayload(rx_mbuf);
+             uint8_t *tx_buff_ptr = ExtractPacketPayload(tx_mbuf);
+             size_t rsp_pckt_size = process_through_memcached(rx_buff_ptr, tx_buff_ptr);
+             // fprintf(stderr, "Packet size in bytes is %ld\n", rsp_pckt_size);
+            
+             // Swap MAC addresses and set packet parameters.
+             struct rte_ether_addr client_addr = rte_pktmbuf_mtod(rx_mbuf, struct rte_ether_hdr *)->s_addr;
+             AppendPacketHeader(&dpdk, tx_mbuf, &client_addr, rsp_pckt_size);
+
+             FreeDPDKPacket(rx_mbuf);
+         }
+
+         // fprintf(stderr, "DPDK-Version of Memcached Server is sending out %d Packets in a single Burst!\n", (int)dpdk.tx_burst_size);
+         // Send response.
+         SendBatch(&dpdk);
+     }
+
+    //while (!stop_main_loop) {
+        // cur_tsc = rte_rdtsc();
+
+		/*
+		 * TX burst queue drain
+		 */
+		// diff_tsc = cur_tsc - prev_tsc;
+		// if (unlikely(diff_tsc > drain_tsc)) {
+
+		// 	for (i = 0; i < dpdk.pmd_port_cnt; i++) {
+
+        //         portid = dpdk.pmd_ports[dpdk.pmd_port_to_use];
+		// 		buffer = tx_buffer[portid];
+
+		// 		pckt_sent = rte_eth_tx_buffer_flush(portid, 0, buffer);
+        //         if(pckt_sent == dpdk.tx_burst_size) {
+        //             fprintf(stderr, "DPDK-Version of Memcached Server is sending out %d Packets (from tx_eth_tx_buffer_flush() API) in a single Burst!\n", (int) pckt_sent);
+        //             rte_pktmbuf_free_bulk(dpdk.tx_mbufs, pckt_sent);
+        //             dpdk.tx_burst_ptr = 0;
+        //             // return 0;
+        //          }
+        //         else{
+        //             fprintf(stderr, "Failed to send all %d packets (from tx_eth_tx_buffer_flush() API), only %d was sent.\n",
+        //                     dpdk.tx_burst_size, pckt_sent);
+        //             rte_pktmbuf_free_bulk(dpdk.tx_mbufs, pckt_sent); //We explicitly free sent pckts -> rte_eth_tx_buffer will free unsent pckts
+        //             // return -1;
+        //             }
+		// 	}
+
+			// /* if timer is enabled */
+			// if (timer_period > 0) {
+
+			// 	/* advance the timer */
+			// 	timer_tsc += diff_tsc;
+
+			// 	/* if timer has reached its timeout */
+			// 	if (unlikely(timer_tsc >= timer_period)) {
+
+			// 		/* do this only on main core */
+			// 		if (dpdk.lcore_id == rte_get_main_lcore()) {
+			// 			// print_stats();
+			// 			/* reset the timer */
+			// 			timer_tsc = 0;
+			// 		}
+			// 	}
+			// }
+
+		// 	prev_tsc = cur_tsc;
+		// }
+        //uint16_t received_pckt_cnt = RecvOverDPDK(&dpdk);
+        
+        //if (received_pckt_cnt == 0) continue;
 
         // Prepare response buffer.
-        AllocateDPDKTxBuffers(&dpdk, received_pckt_cnt);
+        //AllocateDPDKTxBuffers(&dpdk, received_pckt_cnt);
 
-        for (int i = 0; i < received_pckt_cnt; ++i) {
-            struct rte_mbuf *rx_mbuf = GetNextDPDKRxBuffer(&dpdk);
-            struct rte_mbuf *tx_mbuf = GetNextDPDKTxBuffer(&dpdk);
-            assert(rx_mbuf != NULL);
-            assert(tx_mbuf != NULL);
+        //fprintf(stderr, "DPDK-Version of Memcached Server received %d Packets in a single Bursts!\n", (int)received_pckt_cnt);
 
+        //for (int i = 0; i < received_pckt_cnt; ++i) {
+        //    struct rte_mbuf *rx_mbuf = GetNextDPDKRxBuffer(&dpdk);
+        //    struct rte_mbuf *tx_mbuf = GetNextDPDKTxBuffer(&dpdk);
+        //    assert(rx_mbuf != NULL);
+        //    assert(tx_mbuf != NULL);
+	//
             // Process through memcached.
-            uint8_t *rx_buff_ptr = ExtractPacketPayload(rx_mbuf);
-            uint8_t *tx_buff_ptr = ExtractPacketPayload(tx_mbuf);
-            size_t rsp_pckt_size = process_through_memcached(rx_buff_ptr, tx_buff_ptr);
-
+        //    uint8_t *rx_buff_ptr = ExtractPacketPayload(rx_mbuf);
+        //    uint8_t *tx_buff_ptr = ExtractPacketPayload(tx_mbuf);
+        //    size_t rsp_pckt_size = process_through_memcached(rx_buff_ptr, tx_buff_ptr);
+            // fprintf(stderr, "Packet size in bytes is %ld\n", rsp_pckt_size);
+        //    if(!rsp_pckt_size){
+        //        FreeDPDKPacket(rx_mbuf);
+        //       FreeDPDKPacket(tx_mbuf);
+        //       continue;
+        //    }
             // Swap MAC addresses and set packet parameters.
-            struct rte_ether_addr client_addr = rte_pktmbuf_mtod(rx_mbuf, struct rte_ether_hdr *)->s_addr;
-            AppendPacketHeader(&dpdk, tx_mbuf, &client_addr, rsp_pckt_size);
-
-            FreeDPDKPacket(rx_mbuf);
-        }
-
+        //    struct rte_ether_addr client_addr = rte_pktmbuf_mtod(rx_mbuf, struct rte_ether_hdr *)->s_addr;
+        //    AppendPacketHeader(&dpdk, tx_mbuf, &client_addr, rsp_pckt_size);
+        //    
+        //    FreeDPDKPacket(rx_mbuf);
+        //    SendBuffer(&dpdk,tx_mbuf);
+        //}
+        // fprintf(stderr, "DPDK-Version of Memcached Server is sending out %d Packets in a single Burst!\n", (int)dpdk.tx_burst_size);
         // Send response.
-        SendBatch(&dpdk);
-    }
+        // SendBatch(&dpdk);
+    //}
+
 
     /* enter the event loop */
     while (!stop_main_loop) {
