@@ -2,3 +2,7 @@ resources-dpdk/boot.arm64 filter=lfs diff=lfs merge=lfs -text
 resources-dpdk/rootfs.ext2 filter=lfs diff=lfs merge=lfs -text
 resources-dpdk/vmlinux filter=lfs diff=lfs merge=lfs -text
 buildroot/package/cloudsuite_memcached filter=lfs diff=lfs merge=lfs -text
+buildroot/package/cloudsuite_memcached/memcached_client/twitter_dataset/twitter_dataset_20 filter=lfs diff=lfs merge=lfs -text
+buildroot/package/cloudsuite_memcached/memcached_client/twitter_dataset/twitter_dataset_30 filter=lfs diff=lfs merge=lfs -text
+buildroot/package/cloudsuite_memcached/memcached_client/twitter_dataset/twitter_dataset_unscaled filter=lfs diff=lfs merge=lfs -text
+buildroot/package/cloudsuite_memcached/memcached_client/twitter_dataset/twitter_dataset_5 filter=lfs diff=lfs merge=lfs -text
