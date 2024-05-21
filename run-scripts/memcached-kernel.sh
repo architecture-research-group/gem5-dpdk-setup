@@ -122,7 +122,7 @@ if [[ -n "$checkpoint" ]]; then
   PACKET_RATE=5000
   LOADGENREPLAYMODE=ConstThroughput
   PCAP_FILENAME="../resources-dpdk/warmup-5k.pcap"
-  CONFIGARGS="-r 4 --max-checkpoints 1 --checkpoint-at-end --l2_size=$L2_SIZE $CACHE_CONFIG --cpu-clock=$FREQ --loadgen-start=4231917792397 --loadgen-type=Pcap --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
+  CONFIGARGS="-r 2 --max-checkpoints 1 --checkpoint-at-end --l2_size=$L2_SIZE $CACHE_CONFIG --cpu-clock=$FREQ --loadgen-start=4231917792397 --loadgen-type=Pcap --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
   # CONFIGARGS="--max-checkpoints 2 --l2_size=$L2_SIZE $CACHE_CONFIG --cpu-clock=$FREQ --loadgen-start=6025995323418580 --loadgen-type=Pcap --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
   run_simulation > ${RUNDIR}/simout
   exit 0
@@ -141,7 +141,9 @@ else
   GEM5TYPE="opt"
   LOADGENREPLAYMODE=${LOADGENREPLAYMODE:-"ConstThroughput"}
   DEBUG_FLAGS="" #"--debug-flags=LoadgenDebug"
-  CONFIGARGS="--l2_size=$L2_SIZE --cpu-clock=$FREQ $CACHE_CONFIG $CPU_CONFIG -r 5 --loadgen-type=Pcap --loadgen_pcap_filename=$PCAP_FILENAME --loadgen-start=5230327797390 --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT --loadgen-increment-interva=$INCR_INTERVAL"
+  CONFIGARGS="--l2_size=$L2_SIZE --cpu-clock=$FREQ $CACHE_CONFIG $CPU_CONFIG -r 3 --loadgen-type=Pcap \
+  --loadgen_pcap_filename=$PCAP_FILENAME --loadgen-start=5230327797390 --packet-rate=$PACKET_RATE \
+  --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT --loadgen-increment-interva=$INCR_INTERVAL"
   run_simulation > ${RUNDIR}/simout
   exit
 fi

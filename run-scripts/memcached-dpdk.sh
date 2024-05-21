@@ -123,10 +123,9 @@ if [[ -n "$checkpoint" ]]; then
   PACKET_RATE=5000
   LOADGENREPLAYMODE=ConstThroughput
   PCAP_FILENAME="../resources-dpdk/warmup-dpdk-5k.pcap"
-  # PCAP_FILENAME="../resources/warmup-dpdk-trace.pcap"
-  CONFIGARGS="-r 6 --max-checkpoints 1 --checkpoint-at-end --cpu-clock=$FREQ --l2_size=$L2_SIZE $CACHE_CONFIG --loadgen-start=6654416674681 --loadgen-type=Pcap --loadgen-stack=DPDKStack --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
+  CONFIGARGS="-r 2 --max-checkpoints 1 --checkpoint-at-end --cpu-clock=$FREQ --l2_size=$L2_SIZE $CACHE_CONFIG --loadgen-start=6654416674681 --loadgen-type=Pcap --loadgen-stack=DPDKStack --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
   # CONFIGARGS="--max-checkpoints 2 --cpu-clock=$FREQ --l2_size=$L2_SIZE $CACHE_CONFIG --loadgen-start=600011771117451658 --loadgen-type=Pcap --loadgen-stack=DPDKStack --loadgen_pcap_filename=$PCAP_FILENAME --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT"
-  run_simulation > ${RUNDIR}/simout #-$CPUTYPE-$PACKET_RATE-$GEM5TYPE-'burst-32-debug' # --checkpoint-at-end --loadgen-start=5739769265230 -m 605739769265230
+  run_simulation > ${RUNDIR}/simout
   exit 0
 else
   if [[ -z "$PACKET_RATE" ]]; then
@@ -140,11 +139,13 @@ else
   LOADGENREPLAYMODE=${LOADGENREPLAYMODE:-"ConstThroughput"}
   RUNDIR=${GIT_ROOT}/rundir/memcached-dpdk-findbw-cpu-type-exp/$num_nics"NIC"-$GUEST_SCRIPT-$FREQ"-ddio-enabled"-$PACKET_RATE
   setup_dirs
-  # CPUTYPE="O3_ARM_v7a_3" # just because DerivO3CPU is too slow sometimes
+  CPUTYPE="O3_ARM_v7a_3" # just because DerivO3CPU is too slow sometimes
   GEM5TYPE="opt"
   # LOADGENREPLAYMODE=${LOADGENREPLAYMODE:-"ConstThroughput"}
   DEBUG_FLAGS="" #"--debug-flags=LoadgenDebug"
-  CONFIGARGS="--l2_size=$L2_SIZE $CACHE_CONFIG -r 5 --cpu-clock=$FREQ --loadgen-type=Pcap --loadgen-stack=DPDKStack --loadgen_pcap_filename=$PCAP_FILENAME --loadgen-start=6737818477137 --packet-rate=$PACKET_RATE --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT --loadgen-increment-interva=$INCR_INTERVAL"
+  CONFIGARGS="--l2_size=$L2_SIZE $CACHE_CONFIG -r 3 --cpu-clock=$FREQ --loadgen-type=Pcap --loadgen-stack=DPDKStack \
+  --loadgen_pcap_filename=$PCAP_FILENAME --loadgen-start=6737818477137 --packet-rate=$PACKET_RATE \
+  --loadgen-replymode=$LOADGENREPLAYMODE --loadgen-port-filter=$PORT --loadgen-increment-interva=$INCR_INTERVAL"
   run_simulation > ${RUNDIR}/simout
   exit
 fi
