@@ -47,7 +47,7 @@ scons build/<ISA>/gem5.opt -j $(nproc)
   cd dpdk-pktgen-build
   ``` 
 - Modify the `DPDK_VER` environment variable in `dpdk_pktgen.sh` script (optional)
-- source the DPDK installation script
+- source the DPDK installation script (_applies a patch that adds the changes we made to DPDK_)
   ```
   source dpdk_pktgen.sh
   ```
