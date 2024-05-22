@@ -96,7 +96,7 @@ while true; do
   esac
 done
 
-CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$DRIVE_SCRIPT-500-reqs-0s
+CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$DRIVE_SCRIPT
 #CKPT_DIR=${GIT_ROOT}/ckpts/"ckpts-with-new-vmlinux"/$num_nics"NIC"-$GUEST_SCRIPT
 if [[ -z "$num_nics" ]]; then
   echo "Error: missing argument --num-nics" >&2
@@ -105,7 +105,7 @@ fi
 
 if [[ -n "$checkpoint" ]]; then
   # RUNDIR=${GIT_ROOT}/rundir/$num_nics"NIC-ckp"-$GUEST_SCRIPT
-  RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024-rebuttal/memcached-sim-time-exp-5k/$num_nics"NIC-ckp"-$DRIVE_SCRIPT-500-reqs-0s
+  RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024-rebuttal/memcached-sim-time-exp-5k/$num_nics"NIC-ckp"-$DRIVE_SCRIPT
   setup_dirs
   echo "Taking Checkpoint for NICs=$num_nics" >&2
   GEM5TYPE="fast"
