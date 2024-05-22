@@ -2,7 +2,7 @@
 #set -e
 source ./shared.sh
 
-DPDK_VER=21.11
+DPDK_VER=20.11.3
 PKT_VER=21.11.0
 
 install_dpdk() {
@@ -14,13 +14,13 @@ install_dpdk() {
 	rm -rf dpdk-$DPDK_VER.tar.xz*
 	
 	touch dpdk/app/test-pmd/rxptx.c dpdk/app/test-pmd/touchfwd.c
-	patch -p1 < patch_dpdk.patch
-
-	cd ./dpdk
-	meson setup build #-Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
-	cd build
-	ninja
-	sudo ninja install
+#	patch -p1 < patch_dpdk.patch
+#
+#	cd ./dpdk
+#	meson setup build #-Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
+#	cd build
+#	ninja
+#	sudo ninja install
 
 	#cd ${ROOT}
 }
