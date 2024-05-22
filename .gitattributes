@@ -1,2 +1,0 @@
-resources-dpdk/boot.arm64 filter=lfs diff=lfs merge=lfs -text
-resources-dpdk/vmlinux filter=lfs diff=lfs merge=lfs -text
