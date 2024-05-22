@@ -2,8 +2,9 @@
 #set -e
 source ./shared.sh
 
-DPDK_VER=20.11.3
-PKT_VER=20.11.3
+DPDK_VER=21.11 #20.11.3 #23.03
+PKT_VER=21.11.0 #20.11.3 #23.03.0
+TARGET_HOST=arm64-armv8-linux-gcc #x86_64_native_linux_gcc
 
 install_dpdk() {
 	rm -rf dpdk
@@ -36,7 +37,7 @@ install_pktgen() {
 	cd $PKTGEN
 
 	export RTE_SDK=${ROOT}/dpdk
-	export RTE_TARGET=x86_64_native_linux_gcc
+	export RTE_TARGET=$TARGET_HOST
 	export PKTGEN_DIR=$PKTGEN
 	export PKG_CONFIG_PATH=/scratch/pding/opt/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH
 
