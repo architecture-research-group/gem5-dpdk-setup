@@ -3,7 +3,7 @@
 source ./shared.sh
 
 DPDK_VER=20.11.3
-PKT_VER=21.11.0
+PKT_VER=20.11.3
 
 install_dpdk() {
 	rm -rf dpdk
@@ -14,7 +14,7 @@ install_dpdk() {
 	rm -rf dpdk-$DPDK_VER.tar.xz*
 	
 	touch dpdk/app/test-pmd/rxptx.c dpdk/app/test-pmd/touchfwd.c
-	patch -p1 < patch_dpdk_v20.11.3.patch
+	patch -p1 < dpdk_v$DPDK_VER.patch
 
 	cd ./dpdk
 	meson setup build #-Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
