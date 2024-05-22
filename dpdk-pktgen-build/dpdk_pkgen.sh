@@ -14,10 +14,10 @@ install_dpdk() {
 	rm -rf dpdk-$DPDK_VER.tar.xz*
 	
 	touch dpdk/app/test-pmd/rxptx.c dpdk/app/test-pmd/touchfwd.c
-	patch -p1 < dpdk_patch.patch
+	patch -p1 < patch_dpdk.patch
 
 	cd ./dpdk
-	meson -Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
+	meson setup build #-Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
 	cd build
 	ninja
 	sudo ninja install
