@@ -66,8 +66,9 @@ scons build/<ISA>/gem5.opt -j $(nproc)
   ```
   install_pktgen
   ```
-
 We also developed a highly parameterizable load generator model that can run in gem5, sending requests at configurable rates to a server node running in the same simulation instance. 
+
+Please see the [FAQs](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki/FAQs) in our wiki page if you are having issues.
 
 <!-- The organization of this tutorial is as follows: -->
 
