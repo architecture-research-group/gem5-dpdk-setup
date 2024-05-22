@@ -43,7 +43,7 @@ if [[ -z "${GIT_ROOT}" ]]; then
 fi
 
 GEM5_DIR=${GIT_ROOT}/gem5
-RESOURCES=${GIT_ROOT}/resources
+RESOURCES=${GIT_ROOT}/resources-dpdk
 # RESOURCES=${GIT_ROOT}/resources-pktgen-pkt
 GUEST_SCRIPT_DIR=${GIT_ROOT}/guest-scripts
 
@@ -91,7 +91,7 @@ while true; do
   esac
 done
 
-CKPT_DIR=${GIT_ROOT}/ckpts-with-new-vmlinux-buildroot-2023/$num_nics"NIC"-$DRIVE_SCRIPT
+CKPT_DIR=${GIT_ROOT}/ckpts/$num_nics"NIC"-$DRIVE_SCRIPT
 #CKPT_DIR=${GIT_ROOT}/ckpts/"ckpts-with-new-vmlinux"/$num_nics"NIC"-$GUEST_SCRIPT
 if [[ -z "$num_nics" ]]; then
   echo "Error: missing argument --num-nics" >&2
@@ -100,7 +100,7 @@ fi
 
 if [[ -n "$checkpoint" ]]; then
   # RUNDIR=${GIT_ROOT}/rundir/$num_nics"NIC-ckp"-$GUEST_SCRIPT
-  RUNDIR=${GIT_ROOT}/rundir/ISPASS-2024/memcached-sim-time-exp/$num_nics"NIC-ckp"-$DRIVE_SCRIPT
+  RUNDIR=${GIT_ROOT}/rundir/memcachedDPDK-dualmode/$num_nics"NIC-ckp"-$DRIVE_SCRIPT
   setup_dirs
   echo "Taking Checkpoint for NICs=$num_nics" >&2
   GEM5TYPE="fast"
@@ -108,31 +108,20 @@ if [[ -n "$checkpoint" ]]; then
   # packet-size = 0 leads to segfault
   PACKET_SIZE=128
   CPUTYPE="AtomicSimpleCPU"
-  CONFIGARGS="--max-checkpoints 4 --cpu-clock=$Freq"
+  CONFIGARGS="--max-checkpoints 5 $CACHE_CONFIG --cpu-clock=$Freq"
   # CONFIGARGS="-r 1 --max-checkpoints 3 --cpu-clock=$Freq"
   run_simulation > ${RUNDIR}/simout
   exit 0
 else
-  #if [[ -z "$PACKET_SIZE" ]]; then
-   # echo "Error: missing argument --packet_size" >&2
-   # usage
-  #fi
-
-  #if [[ -z "$PACKET_RATE" ]]; then
-  #  echo "Error: missing argument --packet_rate" >&2
-  #  usage
-  #fi
   ((RATE = PACKET_RATE * PACKET_SIZE * 8 / 1024 / 1024 / 1024))
-  RUNDIR=${GIT_ROOT}/rundir/iperf-o3-drive-exp/$num_nics"NIC"-$GUEST_SCRIPT-$Freq"-ddio-enabled"
+  RUNDIR=${GIT_ROOT}/rundir/memcachedDPDK-dualmode/$num_nics"NIC"-$GUEST_SCRIPT-$Freq"-ddio-enabled"
   setup_dirs
-# /dpdk-testpmd-freq-scaling-test
   echo "Running NICs=$num_nics at $RATE GBPS" >&2
   CPUTYPE="O3_ARM_v7a_3"
   GEM5TYPE="opt"
   LOADGENMODE=${LOADGENMODE:-"Static"}
   DEBUG_FLAGS="--debug-flags=LoadgenDebug" #--debug-start=33952834348" #EthernetAll,EthernetDesc,LoadgenDebug
-  CONFIGARGS="$CACHE_CONFIG $CPU_CONFIG -r 4 --cpu-clock=$Freq" # \
-  #--warmup-dpdk 200000000000"
+  CONFIGARGS="$CACHE_CONFIG $CPU_CONFIG -r 5 --cpu-clock=$Freq"
   run_simulation > ${RUNDIR}/simout
   exit
 fi

@@ -2,8 +2,8 @@
 #set -e
 source ./shared.sh
 
-DPDK_VER=20.11.3 #21.11 #23.03
-PKT_VER=20.11.3  #21.11.0 #23.03.0
+DPDK_VER=20.11.3 #21.11 #23.03 #22.07
+PKT_VER=20.11.3  #21.11.0 #23.03.0 #22.07.0
 TARGET_HOST=arm64-armv8-linux-gcc #x86_64_native_linux_gcc
 
 install_dpdk() {
