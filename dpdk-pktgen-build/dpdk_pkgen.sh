@@ -14,7 +14,7 @@ install_dpdk() {
 	rm -rf dpdk-$DPDK_VER.tar.xz*
 	
 	touch dpdk/app/test-pmd/rxptx.c dpdk/app/test-pmd/touchfwd.c
-	patch -p1 < patch_dpdk.patch
+	patch -p1 < patch_dpdk_v20.11.3.patch
 
 	cd ./dpdk
 	meson setup build #-Dplatform=native -Denable_drivers=mlx5_core,qat -Dexamples=all build
