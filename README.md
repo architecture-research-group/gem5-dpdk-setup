@@ -37,7 +37,7 @@ git clone https://github.com/architecture-research-group/gem5-dpdk-setup
 ```
 git lfs install
 ```
-- download the arm bootloader `boot.arm64`, kernel image `vmlinux`, and disk image `rootfs.ext2` [here](https://kansas-my.sharepoint.com/:f:/g/personal/m258a886_home_ku_edu/EheTsInu9o5AoCOuWL6-2QABOPUMmlV6vDP0Li7WSanOUQ?e=efhqXU).
+- download the arm bootloader `boot.arm64`, kernel image `vmlinux`, and disk image `rootfs.ext2` [here](https://kansas-my.sharepoint.com/:f:/g/personal/m258a886_home_ku_edu/EheTsInu9o5AoCOuWL6-2QABOPUMmlV6vDP0Li7WSanOUQ?e=efhqXU) to `resources-dpdk` directory.
 - build `gem5.opt` and `gem5.fast`
 ```
 cd gem5
