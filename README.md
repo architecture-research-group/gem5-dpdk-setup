@@ -27,7 +27,7 @@ In this tutorial, we provide detailed steps on how to use a popular kernel-bypas
 - pktgen v23.03.0 (Intel&reg; Sapphire Rapids CPU)
 
 ## Getting Started
-If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more.
+If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https://gem5bootcamp.github.io/gem5-bootcamp-env/modules/introduction/index/) or DPDK [documentation](http://doc.dpdk.org/guides/linux_gsg/) to learn more. Also, check out the [Wiki](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki) for more info on how to use the tools in this repository.
 
 ### Installing and setting up gem5
 - clone the gem5 respository
