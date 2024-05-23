@@ -97,7 +97,7 @@ Please visit the [FAQs](https://github.com/architecture-research-group/gem5-dpdk
 <!--       ┣ MemcachedKernel -->
 <!--       ┗ MemcachedDpdk -->
 
-## Check out the [wiki page](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki) on how to run:
+## Check out the [wiki page](https://github.com/architecture-research-group/gem5-dpdk-setup/wiki) for details on how to run:
 - DPDK in gem5
 - Memcached in gem5
 - DPDK in real system
