@@ -34,6 +34,9 @@ If you are new to gem5 or DPDK, you can visit the gem5 bootcamp [website](https:
 ```
 git clone https://github.com/architecture-research-group/gem5-dpdk-setup
 ```
+```
+git lfs install
+```
 - build `gem5.opt` and `gem5.fast`
 ```
 cd gem5
