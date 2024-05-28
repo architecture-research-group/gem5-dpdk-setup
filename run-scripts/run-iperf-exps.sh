@@ -78,18 +78,18 @@
 # done
 
 for j in 1GHz 2GHz 3GHz 4GHz;do
-  for i in iperf-128-testnode.sh iperf-256-testnode.sh iperf-512-testnode.sh iperf-1024-testnode.sh iperf-1518-testnode.sh;do
+  for i in iperf-128.sh iperf-256.sh iperf-512.sh iperf-1024.sh iperf-1518.sh;do
     ./run-dual-freq.sh --num-nics 1  --script iperf-1.sh --drivenode-script $i --freq $j &
   done
 done
 
 # for j in 1GHz 2GHz 3GHz 4GHz;do
   # for j in 1GHz 2GHz 3GHz 4GHz;do
-  #   ./run-loadgen.sh --num-nics 1  --script iperf-testnode.sh --pcap-filename iperf3_128pkt.pcap --packet-rate 1523 --freq $j &
-  #   ./run-loadgen.sh --num-nics 1  --script iperf-testnode.sh --pcap-filename iperf3_256pkt.pcap --packet-rate 612 --freq $j &
-  #   ./run-loadgen.sh --num-nics 1  --script iperf-testnode.sh --pcap-filename iperf3_512pkt.pcap --packet-rate 279 --freq $j &
-  #   ./run-loadgen.sh --num-nics 1  --script iperf-testnode.sh --pcap-filename iperf3_1024pkt.pcap --packet-rate 134 --freq $j &
-  #   ./run-loadgen.sh --num-nics 1  --script iperf-testnode.sh --pcap-filename iperf3_1518pkt.pcap --packet-rate 89 --freq $j &
+  #   ./run-loadgen.sh --num-nics 1  --script iperf.sh --pcap-filename iperf3_128pkt.pcap --packet-rate 1523 --freq $j &
+  #   ./run-loadgen.sh --num-nics 1  --script iperf.sh --pcap-filename iperf3_256pkt.pcap --packet-rate 612 --freq $j &
+  #   ./run-loadgen.sh --num-nics 1  --script iperf.sh --pcap-filename iperf3_512pkt.pcap --packet-rate 279 --freq $j &
+  #   ./run-loadgen.sh --num-nics 1  --script iperf.sh --pcap-filename iperf3_1024pkt.pcap --packet-rate 134 --freq $j &
+  #   ./run-loadgen.sh --num-nics 1  --script iperf.sh --pcap-filename iperf3_1518pkt.pcap --packet-rate 89 --freq $j &
   # done
 # done
 
