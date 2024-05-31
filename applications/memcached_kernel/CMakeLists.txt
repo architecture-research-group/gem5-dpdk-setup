@@ -15,11 +15,12 @@ SET (DPDK_C_FLAGS CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_eal/include"
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_ethdev"
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_pdump"
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_net"
-                   CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_eal/arm/include"
+		   CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_eal/x86/include" #change x86 to arm, if using ARM
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_mbuf"
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_mempool"
                    CFLAGS+="-I$ENV{RTE_SDK}/lib/librte_ring"
-                   CFLAGS+="-D_GEM5_")
+		   # CFLAGS+="-D_GEM5_") # Only needed when adding these packages to the buildroot disk image for gem5 simulations
+		   CFLAGS+="-mssse3")
 
 SET (DPDK_LD_FLAGS LDFLAGS+="-L$ENV{RTE_SDK}/build/drivers"
         LDFLAGS+="-L$ENV{RTE_SDK}/build/lib"
@@ -97,7 +98,7 @@ if(USE_DPDK_NETWORKING)
 		message(FATAL_ERROR "failed to configure memcached.......")
 	endif()
 
-	execute_process(COMMAND ./configure --host=arm
+	execute_process(COMMAND ./configure --host=x86 #change to --host=arm if using ARM platform
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/memcached
 		RESULT_VARIABLE MEMCACHED_CONFIGURE_RESULT)
 	if(NOT MEMCACHED_CONFIGURE_RESULT EQUAL "0")
@@ -119,7 +120,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 # link_directories(${CMAKE_CURRENT_SOURCE_DIR}/gem5-lib)
 # link_libraries(m5 gflags)
 link_libraries(gflags)
-add_definitions("-D_GEM5_")
+#add_definitions("-D_GEM5_") # Only needed when adding these packages to the buildroot disk image for gem5 simulations
 
 if(USE_DPDK_NETWORKING)
 	include_directories($ENV{RTE_SDK}/config)
@@ -128,14 +129,14 @@ if(USE_DPDK_NETWORKING)
 	include_directories($ENV{RTE_SDK}/lib/librte_eal/linux/include)
 	include_directories($ENV{RTE_SDK}/lib/librte_ethdev)
 	include_directories($ENV{RTE_SDK}/lib/librte_net)
-	include_directories($ENV{RTE_SDK}/lib/librte_eal/arm/include)
+	include_directories($ENV{RTE_SDK}/lib/librte_eal/x86/include) #change x86 to arm, if using ARM
 	include_directories($ENV{RTE_SDK}/lib/librte_mbuf)
 	include_directories($ENV{RTE_SDK}/lib/librte_mempool)
 	include_directories($ENV{RTE_SDK}/lib/librte_ring)
 	include_directories($ENV{RTE_SDK}/lib/librte_pdump)
 	include_directories($ENV{RTE_SDK}/lib/librte_kvargs)
 	add_definitions("-D_USE_DPDK_CLIENT_")
-	add_definitions(-std=c++17 -O3) # without this, you get an assembler error message Error on ARM Neoverse CPU: selected processor does not support `casp x0,x1,x2,x3,[x4]'
+	#add_definitions(-std=c++17 -O3) # without this, you get an assembler error message Error on ARM Neoverse CPU: selected processor does not support `casp x0,x1,x2,x3,[x4]'
 	# link_libraries must come before add_executable
 	link_libraries(
         -L$ENV{RTE_SDK}/build/drivers
@@ -207,13 +208,14 @@ if(USE_DPDK_NETWORKING)
 
 	# Build memcached dpdk client with the right flags and install into rootfs.
 	add_executable(memcached_client_dpdk memcached_client.cc)	
+	target_compile_options(memcached_client_dpdk PRIVATE "-mssse3") # comment out this line if using ARM platforms
 	#target_link_libraries(memcached_client_dpdk gflags)
 	#install(CODE "execute_process(COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/memcached_client_dpdk $ENV{TARGET_DIR}/usr/bin/memcached_client_dpdk)")
 
 	# Build dpdk_pcap with the right flags and install into rootfs.
 	#set(CMAKE_EXE_LINKER_FLAGS ${DPDK_LD_FLAGS})
 	add_executable(dpdk_pcap dpdk_pcap.c)
-	target_compile_options(dpdk_pcap PRIVATE "-Wno-sign-conversion")
+	target_compile_options(dpdk_pcap PRIVATE "-Wno-sign-conversion" "-mssse3") # remove "-mssse3" compiler option if using ARM
 	#target_link_libraries(dpdk_pcap gflags)
 	#install(CODE "execute_process(COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/dpdk_pcap $ENV{TARGET_DIR}/usr/bin/dpdk_pcap)")
 else()

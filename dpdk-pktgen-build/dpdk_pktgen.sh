@@ -22,8 +22,8 @@ install_dpdk() {
 	cd build
 	ninja
 	sudo ninja install
-
-	#cd ${ROOT}
+	cd .. && export RTE_SDK=$(pwd)
+	cd ${ROOT}
 }
 
 install_pktgen() {
