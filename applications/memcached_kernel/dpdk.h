@@ -25,7 +25,7 @@ static const char *kPacketMemPoolName = "dpdk_packet_mem_pool";
 #define kMTUStandardFrames 1500
 #define kMTUJumboFrames 9000
 #define kLinkTimeOut_ms 100
-#define kMaxBurstSize 1
+#define kMaxBurstSize 128
 
 // To implement new tx pipeline
 #define BURST_TX_DRAIN_US 1000000 /* TX drain every ~100us */
