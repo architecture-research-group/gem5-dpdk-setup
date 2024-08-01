@@ -111,5 +111,14 @@ Please visit the [FAQs](https://github.com/architecture-research-group/gem5-dpdk
 ## Citation
 Please cite our paper if you are using any part of the code for your project
 ```
-Coming up
+@INPROCEEDINGS{10590060,
+  author={Umeike, Johnson and Agarwal, Siddharth and Lazarev, Nikita and Alian, Mohammad},
+  booktitle={2024 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)}, 
+  title={Userspace Networking in gem5}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={179-191},
+  keywords={Sensitivity;Linux;Full stack;Benchmark testing;Hardware;Software;Generators},
+  doi={10.1109/ISPASS61541.2024.00026}}
 ```
